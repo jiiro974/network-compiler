@@ -258,7 +258,7 @@ func serveCmd(args []string) error {
 		return err
 	}
 	fmt.Fprintf(os.Stderr, "serving %d devices at http://%s\n", len(devices), *addr)
-	return http.ListenAndServe(*addr, server.New(devices, policy).Handler())
+	return http.ListenAndServe(*addr, server.New(devices, policy).WithVendors(parser.Vendors()).Handler())
 }
 
 func queryInputs(first string, args []string) ([]string, string, error) {

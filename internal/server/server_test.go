@@ -158,6 +158,24 @@ func TestPolicyAPI(t *testing.T) {
 	}
 }
 
+func TestVendorsAPI(t *testing.T) {
+	ts := httptest.NewServer(New(nil).WithVendors([]string{"cisco", "juniper"}).Handler())
+	defer ts.Close()
+
+	resp, err := http.Get(ts.URL + "/api/vendors")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	var vendors []string
+	if err := json.NewDecoder(resp.Body).Decode(&vendors); err != nil {
+		t.Fatal(err)
+	}
+	if len(vendors) != 2 || vendors[1] != "juniper" {
+		t.Fatalf("vendors = %#v", vendors)
+	}
+}
+
 func TestDevicesAPIFilter(t *testing.T) {
 	devices := []ir.Device{
 		{Hostname: "sw-core-1", SourceFile: "sw-core-1.cfg"},

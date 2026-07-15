@@ -124,7 +124,8 @@ const indexHTML = `<!doctype html>
     }
     async function load() {
       const s = await getJSON('/api/summary');
-      $('status').textContent = s.devices + ' devices';
+      const vendors = await getJSON('/api/vendors');
+      $('status').textContent = s.devices + ' devices · ' + vendors.join(', ');
       const keys = ['devices','interfaces','vlans','routes','acls','ntp_servers','syslog_hosts','snmp_communities'];
       $('metrics').innerHTML = keys.map(k => '<div class="metric"><b>'+esc(s[k] ?? 0)+'</b>'+esc(k)+'</div>').join('');
       await loadPolicy();

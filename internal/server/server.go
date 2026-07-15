@@ -17,6 +17,7 @@ import (
 type Server struct {
 	devices []ir.Device
 	policy  compliance.Policy
+	vendors []string
 }
 
 func New(devices []ir.Device, policies ...compliance.Policy) *Server {
@@ -25,6 +26,11 @@ func New(devices []ir.Device, policies ...compliance.Policy) *Server {
 		policy = policies[0]
 	}
 	return &Server{devices: devices, policy: policy}
+}
+
+func (s *Server) WithVendors(vendors []string) *Server {
+	s.vendors = append([]string(nil), vendors...)
+	return s
 }
 
 func (s *Server) Handler() http.Handler {
@@ -38,6 +44,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("/api/query", s.handleQuery)
 	mux.HandleFunc("/api/check", s.handleCheck)
 	mux.HandleFunc("/api/check/summary", s.handleCheckSummary)
+	mux.HandleFunc("/api/vendors", s.handleVendors)
 	return mux
 }
 
@@ -221,6 +228,10 @@ func (s *Server) handleDiff(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handlePolicy(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, s.policy)
+}
+
+func (s *Server) handleVendors(w http.ResponseWriter, r *http.Request) {
+	writeJSON(w, s.vendors)
 }
 
 func (s *Server) policyFromRequest(r *http.Request) compliance.Policy {
