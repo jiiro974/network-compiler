@@ -8,38 +8,60 @@
     :root {
       color-scheme: light;
       --bg: #f6f7f9;
+      --surface-0: #f6f7f9;
       --surface-1: #ffffff;
       --surface-2: #fbfcfd;
       --ink: #182230;
       --muted: #667085;
+      --text-muted: #667085;
+      --text-secondary: #475467;
       --border: #d8dee8;
+      --border-strong: #c5cdd8;
       --accent: #155eef;
       --accent-soft: #e7efff;
+      --bg-accent: #e7efff;
+      --border-accent: #84adff;
+      --text-accent: #155eef;
       --ok: #067647;
       --ok-soft: #e7f6ee;
+      --bg-success: #e7f6ee;
+      --text-success: #067647;
       --bad: #b42318;
       --bad-soft: #fdeceb;
+      --text-danger: #b42318;
       --warn: #b54708;
       --warn-soft: #fff2df;
       --neutral: #475467;
       --neutral-soft: #eef2f6;
+      --radius: 12px;
       --focus: #155eef;
       --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      --font-mono: var(--mono);
     }
     [data-theme="dark"] {
       color-scheme: dark;
       --bg: #111418;
+      --surface-0: #111418;
       --surface-1: #171b21;
       --surface-2: #1d222a;
       --ink: #e6e9ef;
       --muted: #aab2c0;
+      --text-muted: #aab2c0;
+      --text-secondary: #c1c7d0;
       --border: #333a46;
+      --border-strong: #434b58;
       --accent: #7aa7ff;
       --accent-soft: #172946;
+      --bg-accent: #172946;
+      --border-accent: #4d78c4;
+      --text-accent: #7aa7ff;
       --ok: #5fd49d;
       --ok-soft: #123426;
+      --bg-success: #123426;
+      --text-success: #5fd49d;
       --bad: #ff8a80;
       --bad-soft: #3d1716;
+      --text-danger: #ff8a80;
       --warn: #ffc46b;
       --warn-soft: #382713;
       --neutral: #c1c7d0;
@@ -50,7 +72,7 @@
     html { scroll-behavior: smooth; }
     body {
       margin: 0;
-      background: var(--bg);
+      background: var(--surface-0);
       color: var(--ink);
       font: 400 14px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       letter-spacing: 0;
@@ -61,6 +83,25 @@
     }
     button, input, select, summary, a {
       border-radius: 8px;
+    }
+    .header-nav { display: flex; align-items: center; gap: 4px; margin-left: 8px; }
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 13px;
+      padding: 7px 10px;
+      border: 0.5px solid transparent;
+    }
+    .nav-link:hover, .nav-link:focus-visible {
+      color: var(--text-accent);
+      background: var(--bg-accent);
+      border-color: var(--border);
+    }
+    .nav-link.nav-active {
+      color: var(--text-accent);
+      background: var(--bg-accent);
+      border-color: var(--border-accent);
     }
     button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible, a:focus-visible {
       outline: 2px solid var(--focus);
@@ -95,9 +136,14 @@
     }
     label {
       display: grid;
-      gap: 5px;
-      color: var(--muted);
-      font-size: 13px;
+      gap: 4px;
+      color: var(--text-muted);
+      font-size: 11px;
+      text-transform: lowercase;
+    }
+    .flow-grid input,
+    .flow-grid select {
+      font-family: var(--font-mono);
     }
     header {
       position: sticky;
@@ -107,13 +153,27 @@
       border-bottom: 0.5px solid var(--border);
     }
     .topbar {
+      height: 56px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 16px;
+      gap: 18px;
       max-width: 1240px;
       margin: 0 auto;
-      padding: 14px 18px;
+      padding: 0 18px;
+      flex-wrap: wrap;
+    }
+    .header-actions {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .status-text {
+      color: var(--text-muted);
+      font-size: 13px;
+      white-space: nowrap;
     }
     .brand {
       display: flex;
@@ -131,6 +191,7 @@
       color: var(--accent);
       font: 500 15px/1 var(--mono);
     }
+    .brand strong { font-size: 18px; font-weight: 500; }
     h1, h2, h3, p { margin: 0; }
     h1 { font-size: 18px; font-weight: 500; }
     h2 { font-size: 16px; font-weight: 500; }
@@ -154,7 +215,7 @@
     .flow-card, .card, .verdict, .hop, .empty {
       background: var(--surface-1);
       border: 0.5px solid var(--border);
-      border-radius: 12px;
+      border-radius: var(--radius);
     }
     .flow-card {
       padding: 14px;
@@ -197,18 +258,18 @@
     }
     .metrics {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
     }
     .metric {
       background: var(--surface-1);
       border: 0.5px solid var(--border);
-      border-radius: 12px;
-      padding: 12px;
+      border-radius: var(--radius);
+      padding: 12px 14px;
     }
     .metric .label {
       display: block;
-      color: var(--muted);
+      color: var(--text-muted);
       font-size: 13px;
     }
     .metric .value {
@@ -218,6 +279,29 @@
       font-weight: 500;
       line-height: 1.2;
     }
+    .metric.verdict-card.ok { background: var(--bg-success); border-color: color-mix(in srgb, var(--text-success) 35%, var(--border)); }
+    .metric.verdict-card.ok .label, .metric.verdict-card.ok .value { color: var(--text-success); }
+    .metric.verdict-card.bad { background: var(--bad-soft); border-color: color-mix(in srgb, var(--text-danger) 35%, var(--border)); }
+    .metric.verdict-card.bad .label, .metric.verdict-card.bad .value { color: var(--text-danger); }
+    .metric.verdict-card.warn { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 35%, var(--border)); }
+    .metric.verdict-card.warn .label, .metric.verdict-card.warn .value { color: var(--warn); }
+    .metric.verdict-card .value { font-size: 18px; margin-top: 4px; }
+    .verdict-strip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      flex-wrap: wrap;
+    }
+    .verdict-strip.ok { background: var(--bg-success); color: var(--text-success); }
+    .verdict-strip.bad { background: var(--bad-soft); color: var(--text-danger); }
+    .verdict-strip.warn { background: var(--warn-soft); color: var(--warn); }
+    .verdict-strip.neutral { background: var(--surface-1); color: var(--text-secondary); border: 0.5px solid var(--border); }
+    .verdict-strip-icon { font-size: 18px; font-weight: 500; }
+    .verdict-strip-main { flex: 1; min-width: 0; }
+    .verdict-strip-title { font-size: 14px; font-weight: 500; }
+    .verdict-strip .chip.action { margin-left: auto; }
     .verdict {
       display: grid;
       grid-template-columns: auto 1fr auto;
@@ -267,6 +351,16 @@
       background: var(--accent-soft);
       cursor: pointer;
     }
+    .vendor-pill {
+      display: inline-flex;
+      align-items: center;
+      font-size: 11px;
+      background: var(--surface-1);
+      color: var(--text-secondary);
+      padding: 2px 8px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
     .vendor {
       color: var(--ink);
       font-family: var(--mono);
@@ -287,15 +381,60 @@
     .ribbon {
       background: var(--surface-1);
       border: 0.5px solid var(--border);
-      border-radius: 12px;
-      padding: 12px;
+      border-radius: var(--radius);
+      padding: 14px 12px;
     }
     .ribbon-track {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       min-width: 0;
     }
+    .endpoint-node, .ribbon-node {
+      text-align: center;
+      flex-shrink: 0;
+      min-width: 0;
+    }
+    .endpoint-node .node-circle, .ribbon-node .node-circle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      border-radius: 50%;
+      background: var(--surface-1);
+      border: 0.5px solid var(--border);
+      position: relative;
+    }
+    .endpoint-node .node-circle { width: 34px; height: 34px; font-size: 14px; }
+    .ribbon-node .node-circle {
+      width: 42px;
+      height: 42px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .ribbon-node.active .node-circle {
+      background: var(--bg-accent);
+      border: 2px solid var(--border-accent);
+      color: var(--text-accent);
+    }
+    .ribbon-node .status-dot {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 2px solid var(--surface-0);
+    }
+    .ribbon-node .node-label {
+      font-size: 11px;
+      margin-top: 4px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 90px;
+    }
+    .endpoint-node.dest .node-circle { background: var(--bg-success); color: var(--text-success); border: 0; }
     .endpoint, .ribbon-hop {
       border: 0.5px solid var(--border);
       background: var(--surface-2);
@@ -327,9 +466,25 @@
     .dot.warn { background: var(--warn); }
     .link {
       flex: 1 1 22px;
-      min-width: 18px;
-      height: 1px;
-      background: var(--border);
+      min-width: 8px;
+      height: 0.5px;
+      background: var(--border-strong);
+    }
+    .hop-inline-pipeline {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 10px 14px 0;
+      padding-bottom: 10px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    .hop-inline-pipeline .sep { color: var(--text-muted); }
+    .hop-decision-summary {
+      font-size: 13px;
+      color: var(--text-secondary);
     }
     .hop-list {
       display: grid;
@@ -338,6 +493,10 @@
     .hop {
       scroll-margin-top: 86px;
       overflow: clip;
+      background: var(--surface-2);
+    }
+    details.hop[open], .hop.active-hop {
+      border: 2px solid var(--border-accent);
     }
     .hop summary {
       list-style: none;
@@ -426,10 +585,16 @@
     .evidence-title {
       min-width: 0;
     }
-    .evidence-title code {
+    .evidence-title code, .evidence-path {
       display: block;
-      color: var(--ink);
+      color: var(--text-muted);
+      font-size: 12px;
       overflow-wrap: anywhere;
+    }
+    .icon-btn {
+      min-height: auto;
+      padding: 3px 8px;
+      font-size: 12px;
     }
     .evidence-actions {
       display: flex;
@@ -440,11 +605,12 @@
     }
     pre.conf {
       margin: 0;
-      padding: 10px 0;
+      padding: 10px 12px;
       overflow-x: auto;
       overflow-y: visible;
       background: var(--surface-1);
-      font: 400 13px/1.45 var(--mono);
+      border-radius: var(--radius);
+      font: 400 12px/1.6 var(--mono);
     }
     .code-line {
       display: grid;
@@ -454,12 +620,16 @@
       padding: 0 10px;
     }
     .code-line.context {
-      opacity: 0.62;
+      opacity: 0.55;
+      color: var(--text-muted);
     }
     .code-line.match {
       opacity: 1;
-      background: var(--evidence-match, var(--accent-soft));
-      color: var(--ink);
+      background: var(--bg-accent);
+      color: var(--text-accent);
+      border-left: 2px solid var(--border-accent);
+      margin: 0 -12px;
+      padding: 0 10px;
     }
     .line-no {
       color: var(--muted);
@@ -473,9 +643,12 @@
     .legend {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 14px;
       flex-wrap: wrap;
-      padding: 12px;
+      padding: 12px 0 0;
+      border-top: 0.5px solid var(--border);
+      color: var(--text-muted);
+      font-size: 12px;
     }
     .gallery-group {
       display: flex;
@@ -797,8 +970,15 @@
     }
     @media (max-width: 640px) {
       .topbar {
+        height: auto;
+        min-height: 56px;
         align-items: flex-start;
         flex-direction: column;
+        padding: 12px 18px;
+      }
+      .header-actions {
+        width: 100%;
+        justify-content: flex-start;
       }
       main { padding: 12px; }
       .flow-grid, .editor-row, .metrics, .pipeline {
@@ -840,6 +1020,9 @@
         grid-template-columns: 1fr;
       }
     }
+    .hop.active-hop {
+      background: var(--surface-2);
+    }
     .hop.diff-changed {
       border-color: color-mix(in srgb, var(--warn) 55%, var(--border));
       background: var(--warn-soft);
@@ -850,6 +1033,17 @@
     .hop.diff-removed {
       opacity: 0.72;
       border-style: dashed;
+    }
+    .ribbon-node {
+      border: 0;
+      background: transparent;
+      padding: 0;
+      min-height: auto;
+      cursor: pointer;
+    }
+    .ribbon-node.mismatch-hop .node-circle {
+      border-color: color-mix(in srgb, var(--warn) 55%, var(--border));
+      background: var(--warn-soft);
     }
     .diff-banner {
       border: 0.5px solid var(--border);
@@ -895,13 +1089,16 @@
   <header>
     <div class="topbar">
       <div class="brand">
-        <div class="brand-mark" aria-hidden="true">pt</div>
-        <div>
-          <h1>netc path</h1>
-          <p class="status-line" id="statusText">Ready</p>
-        </div>
+        <div class="brand-mark" aria-hidden="true">nc</div>
+        <strong>netc</strong>
       </div>
-      <div class="button-row">
+      <nav class="header-nav" aria-label="App navigation">
+        <a href="/" class="nav-link">Dashboard</a>
+        <a href="/path" class="nav-link nav-active">Path</a>
+        <a href="/reach" class="nav-link">Reach test</a>
+      </nav>
+      <div class="header-actions">
+        <span id="statusText" class="status-text">Ready</span>
         <button type="button" id="validateButton" class="primary">Valider le chemin</button>
         <button type="button" id="rerunValidateButton" class="subtle hidden">Re-run validation</button>
         <button type="button" id="copyValidationButton" class="subtle hidden">Copy validation JSON</button>
@@ -918,20 +1115,20 @@
     <section class="flow-card" aria-labelledby="flowTitle">
       <h2 id="flowTitle" class="sr-only">Flow</h2>
       <form id="flowForm" class="flow-grid">
-        <label>Source
+        <label>source
           <input id="srcInput" name="src" autocomplete="off" inputmode="numeric" placeholder="10.0.10.55">
         </label>
-        <label>Destination
+        <label>destination
           <input id="dstInput" name="dst" autocomplete="off" inputmode="numeric" placeholder="192.168.50.20">
         </label>
-        <label>Protocol
+        <label>proto
           <select id="protoInput" name="proto">
             <option value="tcp">tcp</option>
             <option value="udp">udp</option>
             <option value="icmp">icmp</option>
           </select>
         </label>
-        <label>Port
+        <label>port
           <input id="dportInput" name="dport" type="number" min="0" max="65535" placeholder="443">
         </label>
         <button class="primary" type="submit">Trace</button>
@@ -974,9 +1171,9 @@
     <section class="grid" aria-live="polite">
       <div id="errorBox" class="empty hidden" role="alert"></div>
       <div id="diffBanner" class="diff-banner hidden" aria-live="polite"></div>
+      <div class="metrics" id="metrics"></div>
       <div id="verdictBanner"></div>
       <div id="agreementBanner"></div>
-      <div class="metrics" id="metrics"></div>
       <div class="ribbon" id="ribbon"></div>
       <div class="hop-list" id="hopList"></div>
       <div class="card legend" id="legend"></div>
@@ -1503,15 +1700,12 @@
       const path = state.path || {};
       const meta = verdictMeta[path.verdict] || { tone: "neutral", icon: "?", title: path.verdict || "No path", copy: "No path data is loaded." };
       const reason = path.reason;
+      const icon = meta.icon === "ok" ? "✓" : meta.icon;
       $("verdictBanner").innerHTML =
-        '<section class="verdict ' + esc(meta.tone) + '" aria-labelledby="verdictTitle">' +
-          '<div class="verdict-icon" aria-hidden="true">' + esc(meta.icon) + '</div>' +
-          '<div>' +
-            '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">' +
-              '<span class="layer-tag predicted">Prédit</span>' +
-              '<h2 id="verdictTitle" class="verdict-title">' + esc(meta.title) + '</h2>' +
-            '</div>' +
-            '<p class="verdict-copy">' + esc(meta.copy) + '</p>' +
+        '<section class="verdict-strip ' + esc(meta.tone) + '" aria-labelledby="verdictTitle">' +
+          '<span class="verdict-strip-icon" aria-hidden="true">' + esc(icon) + '</span>' +
+          '<div class="verdict-strip-main">' +
+            '<span id="verdictTitle" class="verdict-strip-title">' + esc(meta.title) + ' · predicted verdict</span>' +
           '</div>' +
           reasonChip(reason) +
         '</section>';
@@ -1541,15 +1735,25 @@
       const hops = state.path?.hops || [];
       const devices = new Set(hops.map((hop) => hop.device).filter(Boolean));
       const vendors = new Set(hops.map((hop) => hop.vendor).filter(Boolean));
+      const verdict = state.path?.verdict || "none";
+      const meta = verdictMeta[verdict] || { tone: "neutral", title: verdict };
       const metrics = [
-        ["Hops", hops.length],
-        ["Devices", devices.size],
-        ["Vendors", vendors.size],
-        ["Verdict", state.path?.verdict || "none"]
+        ["Hops", hops.length, ""],
+        ["Devices", devices.size, ""],
+        ["Vendors", vendors.size, ""],
+        ["Verdict", meta.title, meta.tone]
       ];
-      $("metrics").innerHTML = metrics.map(([label, value]) =>
-        '<article class="metric"><span class="label">' + esc(label) + '</span><span class="value">' + esc(value) + '</span></article>'
-      ).join("");
+      $("metrics").innerHTML = metrics.map(([label, value, tone]) => {
+        const extra = label === "Verdict" ? " verdict-card " + esc(tone || "neutral") : "";
+        return '<article class="metric' + extra + '"><span class="label">' + esc(label) + '</span><span class="value">' + esc(value) + '</span></article>';
+      }).join("");
+    }
+
+    function ribbonNodeGlyph(hop) {
+      const v = String(hop?.vendor || "").toLowerCase();
+      if (v.includes("pan") || v.includes("forti")) return "◆";
+      if (v.includes("juniper")) return "◇";
+      return "●";
     }
 
     function renderRibbon() {
@@ -1560,18 +1764,31 @@
         $("ribbon").innerHTML = '<div class="empty">No hops to preview.</div>';
         return;
       }
-      const parts = ['<div class="ribbon-track" aria-label="Path overview">', endpoint(flow.src || "source")];
+      const parts = ['<div class="ribbon-track" aria-label="Path overview">'];
+      parts.push(
+        '<div class="endpoint-node"><div class="node-circle" aria-hidden="true">▶</div><div class="node-label">Source</div></div>',
+        '<span class="link" aria-hidden="true"></span>'
+      );
       hops.forEach((hop, index) => {
         const check = checkForDevice(hop.device);
         const observed = check?.observed || "";
         const mismatch = state.validation && check && predictedHopReachable(hop, index) !== (observed === "reachable");
-        parts.push('<span class="link" aria-hidden="true"></span>');
-        parts.push('<button type="button" class="ribbon-hop' + (mismatch ? " mismatch-hop" : "") + '" data-scroll-hop="' + index + '" title="' + esc(ribbonTitle(hop, check)) + '">' +
-          ribbonDot(hop, index, observed) +
-          '<span class="name">' + esc(hop.device || "hop " + (index + 1)) + '</span>' +
-        '</button>');
+        const tone = hopTone(hop, index);
+        const active = state.focusedHop === index ? " active" : "";
+        parts.push(
+          '<button type="button" class="ribbon-node' + active + (mismatch ? " mismatch-hop" : "") + '" data-scroll-hop="' + index + '" title="' + esc(ribbonTitle(hop, check)) + '">' +
+            '<div class="node-circle" aria-hidden="true">' + esc(ribbonNodeGlyph(hop)) +
+              '<span class="status-dot dot ' + esc(tone) + '" aria-hidden="true"></span>' +
+            '</div>' +
+            '<div class="node-label">' + esc(hop.device || "hop " + (index + 1)) + '</div>' +
+          '</button>',
+          '<span class="link" aria-hidden="true"></span>'
+        );
       });
-      parts.push('<span class="link" aria-hidden="true"></span>', endpoint(flow.dst || "destination"), '</div>');
+      parts.push(
+        '<div class="endpoint-node dest"><div class="node-circle" aria-hidden="true">○</div><div class="node-label">Dest</div></div>',
+        '</div>'
+      );
       $("ribbon").innerHTML = parts.join("");
     }
 
@@ -1632,6 +1849,22 @@
       });
     }
 
+    function inlinePipeline(hop) {
+      const parts = [];
+      if (hop.ingress_iface) parts.push("in " + hop.ingress_iface);
+      if (hop.route_match) {
+        const route = [hop.route_match.destination, hop.route_match.next_hop || hop.route_match.interface].filter(Boolean).join(" → ");
+        if (route) parts.push(route);
+      } else if (hop.acl_match) {
+        parts.push(aclText(hop.acl_match));
+      } else if (hop.policy_match) {
+        parts.push(policyText(hop.policy_match));
+      }
+      if (hop.egress_iface) parts.push("out " + hop.egress_iface);
+      if (!parts.length) return "";
+      return parts.map((p, i) => (i ? '<span class="sep" aria-hidden="true">→</span>' : "") + '<span>' + esc(p) + '</span>').join("");
+    }
+
     function renderHop(hop, index) {
       const focus = state.focusedHop === index ? ' data-focused="true"' : "";
       const check = checkForDevice(hop.device);
@@ -1642,15 +1875,22 @@
       const diffMeta = diffHopMeta(index);
       const diffClass = diffMeta ? " diff-" + diffMeta : "";
       const pipeline = renderPipeline(hop);
+      const inline = inlinePipeline(hop);
       const showHop = state.viewMode !== "decisions" || pipeline || evidenceItems(hop).length;
       if (!showHop) return "";
-      return '<details class="hop' + diffClass + '" id="hop-' + index + '" data-index="' + index + '"' + focus + '>' +
+      const decisionSummary = hopDecision(hop);
+      const policyPermit = hop.policy_match && String(hop.policy_match.action || "").toLowerCase() === "allow";
+      const decisionHtml = policyPermit
+        ? '<span class="chip" style="background:var(--bg-success);color:var(--text-success);border-color:color-mix(in srgb,var(--text-success) 35%,var(--border))">policy ' + esc(hop.policy_match.action || "permit") + '</span>'
+        : '<span class="hop-decision-summary">' + esc(decisionSummary || "traversed") + '</span>';
+      return '<details class="hop' + diffClass + (state.focusedHop === index ? " active-hop" : "") + '" id="hop-' + index + '" data-index="' + index + '"' + focus + '>' +
         '<summary tabindex="0" aria-label="Hop ' + (index + 1) + ', ' + esc(hop.device || "unnamed") + '">' +
           '<div class="hop-head">' +
             '<span class="chevron" aria-hidden="true">&gt;</span>' +
-            '<div class="hop-title"><strong>' + esc(index + 1) + '. ' + esc(hop.device || "unknown device") + '</strong>' + vendorBadge(hop.vendor) + '</div>' +
-            '<div class="hop-meta">' + hopChips(hop).join("") + observedChip + mismatchChip + '</div>' +
+            '<div class="hop-title"><span style="font-size:12px;color:var(--text-muted);font-weight:500">' + esc(index + 1) + '</span><strong>' + esc(hop.device || "unknown device") + '</strong>' + vendorBadge(hop.vendor) + '</div>' +
+            '<div class="hop-meta">' + decisionHtml + observedChip + mismatchChip + '</div>' +
           '</div>' +
+          (inline ? '<div class="hop-inline-pipeline">' + inline + '</div>' : '') +
         '</summary>' +
         '<div class="hop-body">' +
           renderCompare(hop, index, check) +
@@ -1814,14 +2054,7 @@
 
     function vendorBadge(vendor) {
       if (!vendor) return "";
-      const normalized = String(vendor).toLowerCase();
-      const marks = [
-        ["cisco", "ci"], ["juniper", "jn"], ["pan", "pa"], ["forti", "ft"],
-        ["mikrotik", "mt"], ["routeros", "mt"], ["aruba", "ar"], ["hpe", "hp"]
-      ];
-      const found = marks.find(([needle]) => normalized.includes(needle));
-      const mark = found ? found[1] : normalized.slice(0, 2);
-      return '<span class="vendor" data-mark="' + esc(mark) + '">' + esc(vendor) + '</span>';
+      return '<span class="vendor-pill">' + esc(vendor) + '</span>';
     }
 
     function hopChips(hop) {
@@ -1927,12 +2160,12 @@
       const ev = item.evidence || {};
       const line = ev.start_line || "?";
       const fileLine = (ev.file || "unknown") + ":" + line;
-      return '<article class="evidence-card" style="--evidence-match:' + evidenceColor(item.tone) + '">' +
+      return '<article class="evidence-card">' +
         '<div class="evidence-head">' +
-          '<div class="evidence-title"><h3>' + esc(item.label) + '</h3><code>' + esc(fileLine) + '</code></div>' +
+          '<div class="evidence-title"><code class="evidence-path">' + esc(fileLine) + '</code></div>' +
           '<div class="evidence-actions">' +
-            '<button type="button" data-copy-evidence="' + hopIndex + ':' + itemIndex + '" aria-label="Copy evidence for ' + esc(item.label) + '">Copy</button>' +
-            '<button type="button" data-open-evidence="' + hopIndex + ':' + itemIndex + '" aria-label="Open file line for ' + esc(item.label) + '">Open</button>' +
+            '<button type="button" class="icon-btn" data-copy-evidence="' + hopIndex + ':' + itemIndex + '" aria-label="Copy evidence for ' + esc(item.label) + '">⎘</button>' +
+            '<button type="button" class="icon-btn" data-open-evidence="' + hopIndex + ':' + itemIndex + '" aria-label="Open file line for ' + esc(item.label) + '">↗</button>' +
           '</div>' +
         '</div>' +
         '<pre class="conf" tabindex="0">' + renderRawBlock(ev) + '</pre>' +
@@ -2083,7 +2316,7 @@
       $("themeButton").addEventListener("click", () => {
         const dark = document.documentElement.dataset.theme !== "dark";
         document.documentElement.dataset.theme = dark ? "dark" : "light";
-        localStorage.setItem("netc.path.theme", dark ? "dark" : "light");
+        localStorage.setItem("netc.theme", dark ? "dark" : "light");
         $("themeButton").textContent = dark ? "Light" : "Dark";
         $("themeButton").setAttribute("aria-pressed", String(dark));
       });
@@ -2167,7 +2400,7 @@
     }
 
     function initTheme() {
-      const theme = localStorage.getItem("netc.path.theme") || "light";
+      const theme = localStorage.getItem("netc.theme") || localStorage.getItem("netc.path.theme") || "light";
       document.documentElement.dataset.theme = theme;
       $("themeButton").textContent = theme === "dark" ? "Light" : "Dark";
       $("themeButton").setAttribute("aria-pressed", String(theme === "dark"));
