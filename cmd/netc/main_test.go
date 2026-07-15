@@ -277,26 +277,19 @@ func TestCollectRunSimulate(t *testing.T) {
 }
 
 func TestCollectIngestFromSimulateOutput(t *testing.T) {
-	planOut := filepath.Join(t.TempDir(), "collect-plan.json")
-	if err := run([]string{"collect", "plan", "--targets", "../../testdata/guard/targets.jsonl", "--guard", "../../testdata/guard/guard.yaml", "--out", planOut}); err != nil {
+	root := filepath.Join(t.TempDir(), "collect-out")
+	if err := os.MkdirAll(filepath.Join(root, "sw1"), 0755); err != nil {
 		t.Fatal(err)
 	}
-	planData, err := os.ReadFile(planOut)
+	src, err := os.ReadFile("../../internal/collect/simulate/sw1/show-running-config.txt")
 	if err != nil {
 		t.Fatal(err)
 	}
-	var plan struct {
-		SHA256 string `json:"sha256"`
-	}
-	if err := json.Unmarshal(planData, &plan); err != nil {
-		t.Fatal(err)
-	}
-	collectOut := filepath.Join(t.TempDir(), "collect-out")
-	if err := run([]string{"collect", "run", "--plan", planOut, "--confirm-plan-sha256", plan.SHA256, "--out", collectOut, "--simulate"}); err != nil {
+	if err := os.WriteFile(filepath.Join(root, "sw1", "show-running-config.txt"), src, 0644); err != nil {
 		t.Fatal(err)
 	}
 	inventoryOut := filepath.Join(t.TempDir(), "inventory.jsonl")
-	if err := run([]string{"collect", "ingest", "--input", collectOut, "--out", inventoryOut, "--vendor", "cisco"}); err != nil {
+	if err := run([]string{"collect", "ingest", "--input", root, "--out", inventoryOut, "--vendor", "cisco"}); err != nil {
 		t.Fatal(err)
 	}
 	devices, err := store.ReadJSONL(inventoryOut)
