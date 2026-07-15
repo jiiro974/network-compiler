@@ -9,6 +9,7 @@ import (
 
 	"network-compiler/internal/ir"
 	"network-compiler/internal/secretredact"
+	"network-compiler/internal/syntax"
 )
 
 const parserVersion = "juniper-junos-set-v0"
@@ -56,7 +57,7 @@ func (Parser) ParseFile(path string) (ir.Device, error) {
 		if t == "" || strings.HasPrefix(t, "#") || strings.HasPrefix(t, "##") {
 			continue
 		}
-		fields := strings.Fields(t)
+		fields := syntax.Fields(t)
 		if len(fields) == 0 || fields[0] != "set" {
 			continue
 		}
@@ -177,12 +178,14 @@ func parseVLANLine(path string, ln line, fields []string, vlans map[string]vlanB
 }
 
 func parseMembers(fields []string) []string {
-	joined := strings.Join(fields, " ")
-	joined = strings.TrimSpace(strings.Trim(joined, "[]"))
-	if joined == "" {
-		return nil
+	var out []string
+	for _, field := range fields {
+		if field == "[" || field == "]" {
+			continue
+		}
+		out = append(out, field)
 	}
-	return strings.Fields(joined)
+	return out
 }
 
 func finalizeInterface(path string, item *ifaceBuild, vlanIDs map[string]int) {
