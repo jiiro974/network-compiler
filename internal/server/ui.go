@@ -476,6 +476,7 @@ const indexHTML = `<!doctype html>
       <nav class="header-nav" aria-label="App navigation">
         <a href="/" class="nav-link nav-active">Dashboard</a>
         <a href="/path" class="nav-link">Path</a>
+        <a href="/reach" class="nav-link">Reach test</a>
       </nav>
       <div class="header-actions">
         <span id="status" class="status-text">loading</span>

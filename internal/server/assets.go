@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-//go:embed assets/path.html assets/fixtures/*.json assets/fixtures/diag/*.json
+//go:embed assets/path.html assets/reach.html assets/fixtures/*.json assets/fixtures/diag/*.json
 var pathAssets embed.FS
 
 func (s *Server) handlePathPage(w http.ResponseWriter, r *http.Request) {

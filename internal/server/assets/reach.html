@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>netc reach test</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f9;
+      --surface-0: #f6f7f9;
+      --surface-1: #ffffff;
+      --surface-2: #fbfcfd;
+      --ink: #182230;
+      --muted: #667085;
+      --text-muted: #667085;
+      --border: #d8dee8;
+      --border-strong: #c5cdd8;
+      --accent: #155eef;
+      --accent-soft: #e7efff;
+      --bg-accent: #e7efff;
+      --border-accent: #84adff;
+      --text-accent: #155eef;
+      --ok: #067647;
+      --ok-soft: #e7f6ee;
+      --bg-success: #e7f6ee;
+      --text-success: #067647;
+      --bad: #b42318;
+      --bad-soft: #fdeceb;
+      --text-danger: #b42318;
+      --warn: #b54708;
+      --warn-soft: #fff2df;
+      --radius: 12px;
+      --focus: #155eef;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    }
+    [data-theme="dark"] {
+      color-scheme: dark;
+      --bg: #111418;
+      --surface-0: #111418;
+      --surface-1: #171b21;
+      --surface-2: #1d222a;
+      --ink: #e6e9ef;
+      --muted: #aab2c0;
+      --text-muted: #aab2c0;
+      --border: #333a46;
+      --border-strong: #434b58;
+      --accent: #7aa7ff;
+      --accent-soft: #172946;
+      --bg-accent: #172946;
+      --border-accent: #4d78c4;
+      --text-accent: #7aa7ff;
+      --ok: #5fd49d;
+      --ok-soft: #123426;
+      --bg-success: #123426;
+      --text-success: #5fd49d;
+      --bad: #ff8a80;
+      --bad-soft: #3d1716;
+      --text-danger: #ff8a80;
+      --warn: #ffc46b;
+      --warn-soft: #382713;
+      --focus: #9bbcff;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font: 400 14px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    header { position: sticky; top: 0; z-index: 10; background: var(--surface-1); border-bottom: 0.5px solid var(--border); }
+    .topbar { height: 56px; display: flex; align-items: center; gap: 18px; padding: 0 18px; }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand-mark { display: grid; place-items: center; width: 32px; height: 32px; border: 0.5px solid var(--border); border-radius: 8px; color: var(--accent); font: 500 15px/1 var(--mono); }
+    .brand strong { font-size: 18px; font-weight: 500; }
+    .header-nav { display: flex; gap: 4px; margin-left: 4px; }
+    .nav-link { color: var(--muted); text-decoration: none; font-weight: 500; font-size: 13px; padding: 7px 10px; border: 0.5px solid transparent; border-radius: 8px; }
+    .nav-link:hover, .nav-link:focus-visible { color: var(--accent); background: var(--bg-accent); border-color: var(--border); }
+    .nav-link.nav-active { color: var(--text-accent); background: var(--bg-accent); border-color: var(--border-accent); }
+    .header-actions { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+    main { max-width: 960px; margin: 0 auto; padding: 18px; }
+    .intro { color: var(--muted); margin: 0 0 16px; line-height: 1.6; }
+    .client-banner {
+      display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+      padding: 12px 14px; margin-bottom: 16px;
+      background: var(--surface-1); border: 0.5px solid var(--border); border-radius: var(--radius);
+    }
+    .flow-card {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 10px; align-items: end;
+      padding: 14px; margin-bottom: 16px;
+      background: var(--surface-1); border-radius: var(--radius); border: 0.5px solid var(--border);
+    }
+    label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+    input, select, button { font: inherit; color: inherit; border-radius: 8px; min-height: 36px; }
+    input, select { width: 100%; padding: 7px 9px; border: 0.5px solid var(--border); background: var(--surface-1); }
+    input.mono { font-family: var(--mono); }
+    button { padding: 7px 14px; border: 0.5px solid var(--accent); background: var(--accent); color: #fff; font-weight: 500; cursor: pointer; }
+    [data-theme="dark"] button { color: #0b1220; }
+    button.secondary { background: var(--surface-1); color: var(--ink); border-color: var(--border); font-weight: 400; }
+    button.subtle { background: var(--surface-1); color: var(--muted); border-color: var(--border); font-weight: 400; }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; align-items: center; }
+    .metrics {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px; margin-bottom: 16px;
+    }
+    .metric {
+      background: var(--surface-1); border-radius: var(--radius); padding: 12px 14px;
+      border: 0.5px solid var(--border);
+    }
+    .metric.ok { background: var(--bg-success); border-color: color-mix(in srgb, var(--ok) 40%, var(--border)); }
+    .metric.bad { background: var(--bad-soft); border-color: color-mix(in srgb, var(--bad) 40%, var(--border)); }
+    .metric.warn { background: var(--warn-soft); }
+    .metric-label { font-size: 12px; color: var(--text-muted); }
+    .metric.ok .metric-label { color: var(--text-success); }
+    .metric.bad .metric-label { color: var(--text-danger); }
+    .metric-value { font-size: 22px; font-weight: 500; margin-top: 4px; }
+    .metric-sub { font-size: 12px; color: var(--muted); margin-top: 2px; font-family: var(--mono); }
+    .verdict-banner {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+      padding: 12px 14px; margin-bottom: 16px; border-radius: var(--radius);
+      border: 0.5px solid var(--border);
+    }
+    .verdict-banner.ok { background: var(--bg-success); color: var(--text-success); }
+    .verdict-banner.bad { background: var(--bad-soft); color: var(--text-danger); }
+    .verdict-banner.warn { background: var(--warn-soft); color: var(--warn); }
+    .section {
+      background: var(--surface-1); border: 0.5px solid var(--border);
+      border-radius: var(--radius); margin-bottom: 14px; overflow: hidden;
+    }
+    .section h2 {
+      margin: 0; padding: 10px 14px; font-size: 13px; font-weight: 500;
+      background: var(--surface-2); border-bottom: 0.5px solid var(--border); color: var(--muted);
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 8px 12px; border-bottom: 0.5px solid var(--border); vertical-align: top; }
+    th { font-size: 12px; color: var(--muted); font-weight: 500; }
+    tr:last-child td { border-bottom: 0; }
+    code { font-family: var(--mono); font-size: 12px; }
+    .pill { display: inline-block; border-radius: 999px; padding: 2px 8px; font-size: 12px; border: 0.5px solid var(--border); }
+    .pill.ok { background: var(--ok-soft); color: var(--ok); border-color: transparent; }
+    .pill.bad { background: var(--bad-soft); color: var(--bad); border-color: transparent; }
+    .pill.warn { background: var(--warn-soft); color: var(--warn); border-color: transparent; }
+    .pill.neutral { background: var(--surface-2); color: var(--muted); }
+    .bar-wrap { height: 8px; background: var(--surface-2); border-radius: 999px; overflow: hidden; margin-top: 4px; }
+    .bar { height: 100%; background: var(--accent); border-radius: 999px; }
+    .error-box { padding: 10px 12px; border-radius: var(--radius); background: var(--bad-soft); color: var(--bad); margin-bottom: 14px; }
+    .hidden { display: none !important; }
+    .status-line { color: var(--muted); font-size: 13px; }
+    @media (max-width: 640px) {
+      .topbar { flex-wrap: wrap; height: auto; padding: 10px 14px; }
+      .header-actions { margin-left: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-mark">nc</div>
+        <strong>Reach test</strong>
+      </div>
+      <nav class="header-nav" aria-label="Navigation">
+        <a href="/" class="nav-link">Dashboard</a>
+        <a href="/path" class="nav-link">Path tracer</a>
+        <a href="/reach" class="nav-link nav-active">Reach test</a>
+      </nav>
+      <div class="header-actions">
+        <span id="statusLine" class="status-line">Prêt</span>
+        <button type="button" id="themeButton" class="subtle">Dark</button>
+      </div>
+    </div>
+  </header>
+  <main>
+    <p class="intro">
+      Page client pour vérifier si un flux atteint réellement la destination distante.
+      Mesures depuis <strong>ce poste</strong> (navigateur + sonde TCP serveur) et depuis
+      <strong>les équipements réseau</strong> (ping hop par hop, observational).
+    </p>
+
+    <div class="client-banner" id="clientBanner">
+      <span>Poste client : <code id="clientIP">…</code></span>
+      <span class="pill neutral" id="clientTime">—</span>
+    </div>
+
+    <div class="flow-card">
+      <div>
+        <label for="src">Source (optionnel)</label>
+        <input id="src" class="mono" placeholder="auto depuis poste" autocomplete="off">
+      </div>
+      <div>
+        <label for="dst">Destination</label>
+        <input id="dst" class="mono" value="192.168.50.20" autocomplete="off">
+      </div>
+      <div>
+        <label for="proto">Proto</label>
+        <select id="proto"><option>tcp</option><option>udp</option></select>
+      </div>
+      <div>
+        <label for="dport">Port</label>
+        <input id="dport" class="mono" type="number" value="443" min="1" max="65535">
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" id="runButton">▶ Lancer le test</button>
+      <label style="display:flex;align-items:center;gap:6px;margin:0;color:var(--muted);font-size:13px;">
+        <input type="checkbox" id="serverTCP" checked style="min-height:auto;width:auto;">
+        Sonde TCP depuis serveur netc
+      </label>
+      <label style="display:flex;align-items:center;gap:6px;margin:0;color:var(--muted);font-size:13px;">
+        <input type="checkbox" id="browserProbe" checked style="min-height:auto;width:auto;">
+        Sonde depuis navigateur
+      </label>
+    </div>
+
+    <div id="errorBox" class="error-box hidden" role="alert"></div>
+
+    <div id="metricsRow" class="metrics hidden"></div>
+    <div id="verdictBanner" class="verdict-banner hidden" role="status"></div>
+
+    <section class="section" id="clientSection">
+      <h2>Mesures depuis ce poste</h2>
+      <table>
+        <thead><tr><th>Origine</th><th>Cible</th><th>Statut</th><th>Latence</th><th>Détail</th></tr></thead>
+        <tbody id="clientProbes"></tbody>
+      </table>
+    </section>
+
+    <section class="section" id="networkSection">
+      <h2>Validation réseau (ping par hop)</h2>
+      <table>
+        <thead><tr><th>Équipement</th><th>Cible ping</th><th>Observé</th><th>Perte</th><th>RTT moy.</th><th>Barre RTT</th></tr></thead>
+        <tbody id="hopChecks"></tbody>
+      </table>
+    </section>
+
+    <section class="section" id="pathSection">
+      <h2>Chemin prédit (config)</h2>
+      <table>
+        <thead><tr><th>#</th><th>Équipement</th><th>Décision</th><th>Résumé</th></tr></thead>
+        <tbody id="pathHops"></tbody>
+      </table>
+    </section>
+  </main>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const THEME_KEY = "netc.theme";
+
+    function esc(s) {
+      return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    }
+    function setStatus(text) { $("statusLine").textContent = text; }
+    function setError(msg) {
+      const el = $("errorBox");
+      if (!msg) { el.classList.add("hidden"); el.textContent = ""; return; }
+      el.textContent = msg;
+      el.classList.remove("hidden");
+    }
+    function applyTheme(theme) {
+      document.documentElement.dataset.theme = theme === "dark" ? "dark" : "light";
+      $("themeButton").textContent = theme === "dark" ? "Light" : "Dark";
+    }
+    async function getJSON(url) {
+      const r = await fetch(url);
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || r.statusText);
+      return j;
+    }
+    async function postJSON(url, body) {
+      const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || r.statusText);
+      return j;
+    }
+    function flow() {
+      const src = $("src").value.trim();
+      const dst = $("dst").value.trim();
+      const proto = $("proto").value.trim() || "tcp";
+      const dport = Number($("dport").value) || 443;
+      const out = { dst, proto, dport };
+      if (src) out.src = src;
+      return out;
+    }
+    function qs(obj) {
+      const p = new URLSearchParams();
+      Object.entries(obj).forEach(([k, v]) => { if (v !== undefined && v !== "") p.set(k, String(v)); });
+      return p.toString();
+    }
+    function pillClass(status) {
+      if (status === "reachable" || status === "ok" || status === "delivered") return "ok";
+      if (status === "unreachable" || status === "timeout" || status === "error") return "bad";
+      if (status === "partial" || status === "mismatch" || status === "inconclusive") return "warn";
+      return "neutral";
+    }
+    function formatMs(ms) {
+      if (ms == null || Number.isNaN(ms)) return "—";
+      return ms < 1 ? "<1 ms" : Math.round(ms) + " ms";
+    }
+
+    async function browserTCPProbe(dst, port) {
+      const start = performance.now();
+      const timeoutMs = 10000;
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      const schemes = port === 443 || port === 8443 ? ["https"] : port === 80 || port === 8080 ? ["http"] : ["https", "http"];
+      let lastErr = "";
+      for (const scheme of schemes) {
+        const url = scheme + "://" + dst + (port ? ":" + port : "") + "/";
+        try {
+          await fetch(url, { mode: "no-cors", signal: controller.signal, cache: "no-store" });
+          clearTimeout(timer);
+          return {
+            status: "reachable",
+            connect_ms: performance.now() - start,
+            detail: "Connexion TCP/HTTP depuis le navigateur (" + scheme + ", réponse opaque ou OK)"
+          };
+        } catch (e) {
+          lastErr = e.message || String(e);
+          if (e.name === "AbortError") {
+            clearTimeout(timer);
+            return { status: "timeout", connect_ms: timeoutMs, detail: "Délai dépassé (" + timeoutMs + " ms)" };
+          }
+        }
+      }
+      clearTimeout(timer);
+      return {
+        status: "unreachable",
+        connect_ms: performance.now() - start,
+        detail: lastErr || "Connexion refusée ou filtrée depuis ce poste"
+      };
+    }
+
+    async function serverTCPProbe(dst, port) {
+      return postJSON("/api/reach/tcp", { host: dst, port, timeout_ms: 8000 });
+    }
+
+    function renderClientProbes(rows) {
+      $("clientProbes").innerHTML = rows.length
+        ? rows.map((r) => "<tr><td>" + esc(r.from) + "</td><td><code>" + esc(r.target) + "</code></td><td><span class=\"pill " + pillClass(r.status) + "\">" + esc(r.status) + "</span></td><td><code>" + esc(formatMs(r.connect_ms)) + "</code></td><td>" + esc(r.detail || "") + "</td></tr>").join("")
+        : "<tr><td colspan=\"5\" style=\"color:var(--muted)\">Aucune sonde client activée.</td></tr>";
+    }
+
+    function renderHopChecks(checks, maxRtt) {
+      if (!checks || !checks.length) {
+        $("hopChecks").innerHTML = "<tr><td colspan=\"6\" style=\"color:var(--muted)\">Aucun ping hop (simulate ou runner indisponible).</td></tr>";
+        return;
+      }
+      $("hopChecks").innerHTML = checks.map((c) => {
+        const rtt = c.result?.rtt_avg_ms ?? 0;
+        const loss = c.result?.loss_pct ?? 0;
+        const pct = maxRtt > 0 ? Math.min(100, (rtt / maxRtt) * 100) : 0;
+        return "<tr><td><code>" + esc(c.from_device) + "</code></td><td><code>" + esc(c.target) + "</code></td><td><span class=\"pill " + pillClass(c.observed) + "\">" + esc(c.observed) + "</span></td><td>" + esc(loss.toFixed(0)) + "%</td><td><code>" + esc(formatMs(rtt)) + "</code></td><td><div class=\"bar-wrap\"><div class=\"bar\" style=\"width:" + pct.toFixed(0) + "%\"></div></div></td></tr>";
+      }).join("");
+    }
+
+    function hopDecision(hop) {
+      if (hop.policy_match) return hop.policy_match.action || hop.policy_match.name || "policy";
+      if (hop.acl_match) return hop.acl_match.action || "acl";
+      if (hop.route_match) return "route";
+      return "forward";
+    }
+    function hopSummary(hop) {
+      if (hop.policy_match) return (hop.policy_match.name || "policy") + " · " + (hop.policy_match.from_zone || "") + "→" + (hop.policy_match.to_zone || "");
+      if (hop.route_match) return (hop.route_match.destination || "") + " → " + (hop.route_match.next_hop || hop.next_hop || "");
+      if (hop.next_hop) return "next " + hop.next_hop;
+      return hop.egress_iface ? "out " + hop.egress_iface : "traversed";
+    }
+
+    function renderPathHops(path) {
+      const hops = path?.hops || [];
+      $("pathHops").innerHTML = hops.length
+        ? hops.map((h, i) => "<tr><td>" + (i + 1) + "</td><td><code>" + esc(h.device) + "</code></td><td><span class=\"pill neutral\">" + esc(hopDecision(h)) + "</span></td><td>" + esc(hopSummary(h)) + "</td></tr>").join("")
+        : "<tr><td colspan=\"4\" style=\"color:var(--muted)\">Aucun hop prédit.</td></tr>";
+    }
+
+    function renderMetrics(data) {
+      const el = $("metricsRow");
+      el.classList.remove("hidden");
+      const cards = [
+        { label: "Poste client", value: data.clientStatus, sub: formatMs(data.clientMs), cls: pillClass(data.clientStatus) },
+        { label: "Prédit (config)", value: data.predicted, sub: data.hopCount + " hops", cls: pillClass(data.predicted) },
+        { label: "Observé (réseau)", value: data.observed, sub: data.agreement, cls: pillClass(data.observed) },
+        { label: "Durée totale", value: formatMs(data.totalMs), sub: "test complet", cls: "neutral" }
+      ];
+      el.innerHTML = cards.map((c) => "<div class=\"metric " + (c.cls === "ok" ? "ok" : c.cls === "bad" ? "bad" : c.cls === "warn" ? "warn" : "") + "\"><div class=\"metric-label\">" + esc(c.label) + "</div><div class=\"metric-value\">" + esc(c.value) + "</div><div class=\"metric-sub\">" + esc(c.sub) + "</div></div>").join("");
+    }
+
+    function renderVerdict(data) {
+      const el = $("verdictBanner");
+      el.classList.remove("hidden", "ok", "bad", "warn");
+      let cls = "warn";
+      let text = "";
+      if (data.clientStatus === "reachable" && data.observed === "reachable" && data.agreement === "match") {
+        cls = "ok";
+        text = "✓ Destination joignable depuis ce poste et cohérente avec le chemin prédit.";
+      } else if (data.clientStatus === "unreachable" || data.observed === "unreachable") {
+        cls = "bad";
+        text = "✗ Destination non joignable ou partiellement bloquée — vérifiez ACL/firewall et le chemin prédit.";
+      } else if (data.agreement === "mismatch") {
+        cls = "warn";
+        text = "⚠ Écart config vs réalité : le modèle prédit « " + data.predicted + " » mais l'observation dit « " + data.observed + " ».";
+      } else {
+        text = "Résultat partiel ou inconclusif — consultez le détail par hop.";
+      }
+      el.classList.add(cls);
+      el.textContent = text;
+    }
+
+    async function runTest() {
+      setError("");
+      const f = flow();
+      if (!f.dst) { setError("Destination requise."); return; }
+      setStatus("Test en cours…");
+      $("runButton").disabled = true;
+      const t0 = performance.now();
+      const probes = [];
+      let clientStatus = "inconclusive";
+      let clientMs = null;
+
+      try {
+        const tasks = [
+          getJSON("/api/path?" + qs(f)),
+          postJSON("/api/path/validate", f)
+        ];
+        if ($("browserProbe").checked) {
+          tasks.push(browserTCPProbe(f.dst, f.dport).then((r) => ({ ...r, from: "navigateur", target: f.dst + ":" + f.dport })));
+        }
+        if ($("serverTCP").checked) {
+          tasks.push(serverTCPProbe(f.dst, f.dport).then((r) => ({ ...r, from: "serveur netc", target: f.dst + ":" + f.dport, connect_ms: r.connect_ms, detail: r.error || "Dial TCP OK" })));
+        }
+
+        const results = await Promise.all(tasks);
+        const path = results[0];
+        const validation = results[1];
+        const probeResults = results.slice(2);
+        probes.push(...probeResults);
+
+        if (probes.length) {
+          const best = probes.find((p) => p.status === "reachable") || probes[0];
+          clientStatus = best.status;
+          clientMs = best.connect_ms;
+        }
+
+        const checks = validation.checks || [];
+        const maxRtt = Math.max(1, ...checks.map((c) => c.result?.rtt_avg_ms || 0));
+        renderClientProbes(probes);
+        renderHopChecks(checks, maxRtt);
+        renderPathHops(path);
+
+        const summary = {
+          clientStatus,
+          clientMs,
+          predicted: validation.predicted_verdict || path.verdict,
+          observed: validation.observed_verdict || "inconclusive",
+          agreement: validation.agreement || "—",
+          hopCount: (path.hops || []).length,
+          totalMs: performance.now() - t0
+        };
+        renderMetrics(summary);
+        renderVerdict(summary);
+        setStatus("Test terminé en " + formatMs(summary.totalMs));
+      } catch (e) {
+        setError(e.message);
+        setStatus("Erreur");
+      } finally {
+        $("runButton").disabled = false;
+      }
+    }
+
+    async function loadContext() {
+      try {
+        const ctx = await getJSON("/api/reach/context");
+        $("clientIP").textContent = ctx.client_ip || "—";
+        $("clientTime").textContent = ctx.server_time || "";
+        if (!$("src").value.trim() && ctx.client_ip) $("src").value = ctx.client_ip;
+      } catch (_) {
+        $("clientIP").textContent = "inconconnu";
+      }
+    }
+
+    $("runButton").addEventListener("click", runTest);
+    $("themeButton").addEventListener("click", () => {
+      const dark = document.documentElement.dataset.theme !== "dark";
+      const theme = dark ? "dark" : "light";
+      applyTheme(theme);
+      localStorage.setItem(THEME_KEY, theme);
+    });
+    applyTheme(localStorage.getItem(THEME_KEY) || "light");
+    loadContext();
+
+    const params = new URLSearchParams(location.search);
+    if (params.get("dst")) $("dst").value = params.get("dst");
+    if (params.get("dport")) $("dport").value = params.get("dport");
+    if (params.get("src")) $("src").value = params.get("src");
+    if (params.get("run") === "1") runTest();
+  </script>
+</body>
+</html>
