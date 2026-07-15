@@ -456,6 +456,43 @@ func TestDiffAPI(t *testing.T) {
 	}
 }
 
+func TestIndexHTMLContainsDiffModes(t *testing.T) {
+	ts := httptest.NewServer(New(nil).Handler())
+	defer ts.Close()
+
+	resp, err := http.Get(ts.URL + "/")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status = %d", resp.StatusCode)
+	}
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	html := string(body)
+	for _, want := range []string{
+		"brand-mark",
+		"netc.theme",
+		"nav-link nav-active",
+		`href="/path"`,
+		"data-diff-mode=\"normalized\"",
+		"data-diff-mode=\"table\"",
+		"data-diff-sub=\"config\"",
+		"function evidenceHighlightPre",
+		"function diffTypeClass",
+		"diff-type-badge",
+		"norm-section",
+		".code-line.match",
+	} {
+		if !strings.Contains(html, want) {
+			t.Fatalf("index HTML missing %q", want)
+		}
+	}
+}
+
 func TestDiffAPIReturnsEmptyArrayForNoChange(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "same.cfg")

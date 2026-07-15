@@ -10,36 +10,55 @@ const indexHTML = `<!doctype html>
     :root {
       color-scheme: light;
       --bg: #f6f7f9;
+      --surface-0: #f6f7f9;
       --surface-1: #ffffff;
       --surface-2: #fbfcfd;
       --ink: #182230;
       --muted: #667085;
+      --text-muted: #667085;
       --border: #d8dee8;
+      --border-strong: #c5cdd8;
       --accent: #155eef;
       --accent-soft: #e7efff;
+      --bg-accent: #e7efff;
+      --border-accent: #84adff;
+      --text-accent: #155eef;
       --ok: #067647;
       --ok-soft: #e7f6ee;
+      --bg-success: #e7f6ee;
+      --text-success: #067647;
       --bad: #b42318;
       --bad-soft: #fdeceb;
+      --text-danger: #b42318;
       --warn: #b54708;
       --warn-soft: #fff2df;
+      --radius: 12px;
       --focus: #155eef;
       --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
     }
     [data-theme="dark"] {
       color-scheme: dark;
       --bg: #111418;
+      --surface-0: #111418;
       --surface-1: #171b21;
       --surface-2: #1d222a;
       --ink: #e6e9ef;
       --muted: #aab2c0;
+      --text-muted: #aab2c0;
       --border: #333a46;
+      --border-strong: #434b58;
       --accent: #7aa7ff;
       --accent-soft: #172946;
+      --bg-accent: #172946;
+      --border-accent: #4d78c4;
+      --text-accent: #7aa7ff;
       --ok: #5fd49d;
       --ok-soft: #123426;
+      --bg-success: #123426;
+      --text-success: #5fd49d;
       --bad: #ff8a80;
       --bad-soft: #3d1716;
+      --text-danger: #ff8a80;
       --warn: #ffc46b;
       --warn-soft: #382713;
       --focus: #9bbcff;
@@ -86,8 +105,13 @@ const indexHTML = `<!doctype html>
     }
     .nav-link:hover, .nav-link:focus-visible {
       color: var(--accent);
-      background: var(--accent-soft);
+      background: var(--bg-accent);
       border-color: var(--border);
+    }
+    .nav-link.nav-active {
+      color: var(--text-accent);
+      background: var(--bg-accent);
+      border-color: var(--border-accent);
     }
     .header-actions { margin-left: auto; display: flex; align-items: center; gap: 10px; }
     .status-text { color: var(--muted); font-size: 13px; white-space: nowrap; }
@@ -220,14 +244,15 @@ const indexHTML = `<!doctype html>
     .warning { color:var(--warn); font-weight:600; }
     .view { display:none; }
     .view.active { display:block; }
+    .hidden { display:none !important; }
     .device-meta {
       display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px;
     }
     .device-config { display:flex; flex-direction:column; gap:14px; }
     .norm-section {
       border:0.5px solid var(--border);
-      border-radius:10px;
-      background:var(--surface-1);
+      border-radius:var(--radius);
+      background:var(--surface-2);
       overflow:hidden;
     }
     .norm-section h3 {
@@ -241,8 +266,9 @@ const indexHTML = `<!doctype html>
     }
     .norm-list { margin:0; padding:0; list-style:none; }
     .norm-item {
-      padding:10px 12px;
+      padding:12px 14px;
       border-bottom:0.5px solid var(--border);
+      background:var(--surface-1);
     }
     .norm-item:last-child { border-bottom:0; }
     .norm-line {
@@ -297,15 +323,147 @@ const indexHTML = `<!doctype html>
       border-radius:8px;
       background:var(--surface-2);
     }
-    .norm-evidence-body pre {
-      margin:6px 0 0;
-      max-height:200px;
+    .norm-evidence-body pre.conf,
+    pre.conf {
+      margin:0;
+      padding:10px 0;
+      overflow-x:auto;
+      background:var(--surface-1);
+      font:400 13px/1.45 var(--mono);
+      border-radius:var(--radius);
+    }
+    .code-line {
+      display:grid;
+      grid-template-columns:58px minmax(max-content,1fr);
+      gap:12px;
+      min-height:19px;
+      padding:0 10px;
+    }
+    .code-line.context { opacity:0.55; color:var(--text-muted); }
+    .code-line.match {
+      opacity:1;
+      background:var(--bg-accent);
+      color:var(--text-accent);
+      border-left:2px solid var(--border-accent);
+      margin:0 -10px;
+      padding:0 8px 0 10px;
+    }
+    .line-no { color:var(--text-muted); text-align:right; user-select:none; }
+    .evidence-card {
+      border:0.5px solid var(--border);
+      border-radius:var(--radius);
+      background:var(--surface-2);
+      overflow:hidden;
+    }
+    .evidence-card .evidence-head {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      padding:8px 10px;
+      border-bottom:0.5px solid var(--border);
+      font-size:12px;
+    }
+    .diff-toolbar {
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      margin:0 0 12px;
+    }
+    .mode-toggle {
+      display:inline-flex;
+      border:0.5px solid var(--border);
+      border-radius:var(--radius);
+      overflow:hidden;
+      background:var(--surface-1);
+    }
+    .mode-toggle button {
+      border:0;
+      border-radius:0;
+      background:transparent;
+      color:var(--text-muted);
+      font-weight:500;
+      min-height:34px;
+      padding:6px 12px;
+    }
+    .mode-toggle button.active {
+      background:var(--bg-accent);
+      color:var(--text-accent);
+    }
+    .mode-toggle button + button { border-left:0.5px solid var(--border); }
+    .diff-summary-bar {
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-bottom:12px;
+    }
+    .diff-list { display:grid; gap:10px; padding:10px 12px 12px; }
+    .diff-change-card {
+      border:0.5px solid var(--border);
+      border-radius:var(--radius);
+      background:var(--surface-1);
+      padding:12px 14px;
+    }
+    .diff-change-head {
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      gap:8px;
+      margin-bottom:8px;
+    }
+    .diff-type-badge {
+      display:inline-flex;
+      align-items:center;
+      border-radius:999px;
+      padding:2px 9px;
+      font-size:12px;
+      font-weight:500;
+      text-transform:lowercase;
+    }
+    .diff-type-badge.diff-add { background:var(--bg-success); color:var(--text-success); }
+    .diff-type-badge.diff-remove { background:var(--bad-soft); color:var(--text-danger); }
+    .diff-type-badge.diff-change { background:var(--warn-soft); color:var(--warn); }
+    td.diff-add, .diff-pane.diff-add { background:var(--bg-success); }
+    td.diff-remove, .diff-pane.diff-remove { background:var(--bad-soft); }
+    td.diff-change, .diff-pane.diff-change { background:var(--warn-soft); }
+    .diff-summary { flex:1; min-width:180px; font-family:var(--mono); font-size:12px; }
+    .diff-panes {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-bottom:8px;
+    }
+    .diff-panes.stacked { grid-template-columns:1fr; }
+    .diff-pane {
+      border:0.5px solid var(--border);
+      border-radius:8px;
+      padding:8px 10px;
+      min-width:0;
+    }
+    .diff-label {
+      display:block;
+      font-size:11px;
+      color:var(--text-muted);
+      margin-bottom:4px;
+      text-transform:uppercase;
+      letter-spacing:0.04em;
+    }
+    .diff-pane-line {
       font-family:var(--mono);
       font-size:12px;
       line-height:1.55;
-      white-space:pre-wrap;
+      word-break:break-word;
     }
-    @media (max-width: 850px) { main { grid-template-columns:1fr; } aside { border-right:0; border-bottom:0.5px solid var(--border); } .header-actions .status-text { display:none; } }
+    .type-added { color:var(--text-success); font-weight:500; }
+    .type-removed { color:var(--text-danger); font-weight:500; }
+    .type-changed { color:var(--warn); font-weight:500; }
+    @media (max-width: 850px) {
+      main { grid-template-columns:1fr; }
+      aside { border-right:0; border-bottom:0.5px solid var(--border); }
+      .header-actions .status-text { display:none; }
+      .diff-panes { grid-template-columns:1fr; }
+    }
   </style>
 </head>
 <body>
@@ -316,7 +474,8 @@ const indexHTML = `<!doctype html>
         <strong>netc</strong>
       </div>
       <nav class="header-nav" aria-label="App navigation">
-        <a href="/path" class="nav-link">Path tracer</a>
+        <a href="/" class="nav-link nav-active">Dashboard</a>
+        <a href="/path" class="nav-link">Path</a>
       </nav>
       <div class="header-actions">
         <span id="status" class="status-text">loading</span>
@@ -423,7 +582,21 @@ const indexHTML = `<!doctype html>
           <button type="submit">Diff</button>
         </form>
         <div id="diffError" class="error" hidden></div>
-        <table id="diffs"><thead><tr><th>type</th><th>device</th><th>object</th><th>summary</th><th>evidence</th></tr></thead><tbody></tbody></table>
+        <div class="diff-toolbar" id="diffToolbar" hidden>
+          <div class="mode-toggle" role="group" aria-label="Diff display mode">
+            <button type="button" class="secondary" data-diff-mode="normalized">Normalized diff</button>
+            <button type="button" class="secondary" data-diff-mode="table">Table</button>
+          </div>
+          <div class="mode-toggle" id="diffSubToggle" role="group" aria-label="Normalized diff layout" hidden>
+            <button type="button" class="secondary" data-diff-sub="side">Side by side</button>
+            <button type="button" class="secondary" data-diff-sub="stacked">Stacked</button>
+            <button type="button" class="secondary" data-diff-sub="config">Config lines</button>
+          </div>
+          <div class="diff-summary-bar" id="diffSummaryBar" hidden></div>
+          <span id="diffCount" class="pill">0 changes</span>
+        </div>
+        <div id="diffResults"></div>
+        <table id="diffs" class="hidden"><thead><tr><th>type</th><th>device</th><th>object</th><th>summary</th><th>evidence</th></tr></thead><tbody></tbody></table>
       </div>
     </section>
   </main>
@@ -431,6 +604,9 @@ const indexHTML = `<!doctype html>
     const $ = (id) => document.getElementById(id);
     const THEME_KEY = 'netc.theme';
     let queryRows = [];
+    let diffRows = [];
+    let diffMode = localStorage.getItem('netc.diffMode') || 'normalized';
+    let diffSubMode = localStorage.getItem('netc.diffSubMode') || 'side';
     function setError(id, message) {
       const el = $(id);
       if (!message) {
@@ -453,14 +629,189 @@ const indexHTML = `<!doctype html>
       return j;
     }
     function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function evidenceHighlightPre(ev) {
+      const raw = String(ev?.raw_block || '');
+      if (!raw) return '<span class="code-line"><span class="line-no">?</span><code>No raw block reported</code></span>';
+      const lines = raw.split('\n');
+      const start = Number(ev.start_line || 1);
+      const end = Number(ev.end_line || start);
+      return lines.map((line, offset) => {
+        const lineNo = start + offset;
+        const isMatch = lineNo >= start && lineNo <= end;
+        const klass = isMatch ? 'match' : 'context';
+        return '<span class="code-line '+klass+'"><span class="line-no">'+esc(lineNo)+'</span><code>'+esc(line || ' ')+'</code></span>';
+      }).join('');
+    }
     function evidenceCell(ev) {
       if (!ev || !ev.file) return '';
-      return '<div class="evidence-path"><code>'+esc(ev.file)+':'+ev.start_line+'-'+ev.end_line+'</code></div><pre>'+esc(ev.raw_block)+'</pre>';
+      const loc = esc(ev.file)+':'+(ev.start_line||'?');
+      return '<article class="evidence-card"><div class="evidence-head"><code>'+loc+'</code></div><pre class="conf">'+evidenceHighlightPre(ev)+'</pre></article>';
     }
     function evidenceDetails(ev, label) {
       if (!ev || !ev.file) return '';
-      const loc = esc(ev.file)+':'+ev.start_line+'-'+(ev.end_line || ev.start_line);
-      return '<details class="norm-evidence"><summary>'+esc(label || 'Evidence')+' · '+loc+'</summary><div class="norm-evidence-body"><code>'+loc+'</code><pre>'+esc(ev.raw_block || '')+'</pre></div></details>';
+      const loc = esc(ev.file)+':'+(ev.start_line||'?')+'-'+(ev.end_line || ev.start_line);
+      return '<details class="norm-evidence"><summary>'+esc(label || 'Evidence')+' · '+loc+'</summary><div class="norm-evidence-body"><code>'+loc+'</code><pre class="conf">'+evidenceHighlightPre(ev)+'</pre></div></details>';
+    }
+    function diffSectionKey(object) {
+      const o = String(object || '');
+      if (o.startsWith('vlan:')) return 'VLANs';
+      if (o.startsWith('interface:')) return 'Interfaces';
+      if (o.startsWith('route:')) return 'Routes';
+      if (o.startsWith('acl:')) return 'ACLs';
+      return 'Other';
+    }
+    function diffTypeClass(type) {
+      if (type === 'added') return 'diff-add';
+      if (type === 'removed') return 'diff-remove';
+      return 'diff-change';
+    }
+    function diffTypeLabel(type) {
+      if (type === 'added') return 'added';
+      if (type === 'removed') return 'removed';
+      return 'changed';
+    }
+    function formatDiffObject(obj) {
+      if (!obj || typeof obj !== 'object') return String(obj ?? '—');
+      if (obj.id !== undefined && (obj.name !== undefined || obj.id !== null)) {
+        return 'vlan '+obj.id+(obj.name ? ' '+obj.name : '');
+      }
+      if (obj.name && (obj.mode || obj.access_vlan || obj.trunk_vlans || obj.ipv4)) {
+        const parts = [obj.mode || 'interface', obj.name];
+        if (obj.access_vlan) parts.push('access vlan '+obj.access_vlan);
+        if (obj.trunk_vlans && obj.trunk_vlans.length) parts.push('trunk '+obj.trunk_vlans.join(','));
+        if (obj.ipv4) parts.push('ip '+obj.ipv4);
+        if (obj.shutdown) parts.push('shutdown');
+        if (obj.description) parts.push(obj.description);
+        return parts.join(' · ');
+      }
+      if (obj.destination) {
+        return [obj.destination, obj.next_hop, obj.interface].filter(Boolean).join(' → ');
+      }
+      if (obj.name) return String(obj.name);
+      return JSON.stringify(obj);
+    }
+    function diffEvidenceBlocks(row) {
+      const blocks = [];
+      const beforeEv = row.before?.evidence || (row.type === 'removed' ? row.evidence : null);
+      const afterEv = row.after?.evidence || (row.type === 'added' ? row.evidence : (row.type === 'changed' ? row.evidence : null));
+      if (beforeEv && beforeEv.file) blocks.push({ label: 'Before', ev: beforeEv });
+      if (afterEv && afterEv.file) blocks.push({ label: 'After', ev: afterEv });
+      if (!blocks.length && row.evidence && row.evidence.file) {
+        blocks.push({ label: 'Evidence', ev: row.evidence });
+      }
+      return blocks;
+    }
+    function renderDiffEvidenceSection(row) {
+      return diffEvidenceBlocks(row).map(b => evidenceDetails(b.ev, b.label)).join('');
+    }
+    function renderDiffChangeCard(row) {
+      const cls = diffTypeClass(row.type);
+      const beforeLine = row.before ? formatDiffObject(row.before) : '';
+      const afterLine = row.after ? formatDiffObject(row.after) : '';
+      let panes = '';
+      if (diffSubMode === 'config') {
+        const blocks = diffEvidenceBlocks(row);
+        if (blocks.length) {
+          panes = blocks.map(b =>
+            '<div class="diff-pane '+cls+'"><span class="diff-label">'+esc(b.label)+'</span><pre class="conf">'+evidenceHighlightPre(b.ev)+'</pre></div>'
+          ).join('');
+        }
+      } else if (beforeLine || afterLine) {
+        const stacked = diffSubMode === 'stacked';
+        panes = '<div class="diff-panes'+(stacked ? ' stacked' : '')+'">'+
+          (beforeLine ? '<div class="diff-pane diff-remove"><span class="diff-label">Before</span><div class="diff-pane-line">'+esc(beforeLine)+'</div></div>' : '')+
+          (afterLine ? '<div class="diff-pane diff-add"><span class="diff-label">After</span><div class="diff-pane-line">'+esc(afterLine)+'</div></div>' : '')+
+        '</div>';
+      }
+      const evidence = renderDiffEvidenceSection(row);
+      return '<article class="diff-change-card '+cls+'">'+
+        '<div class="diff-change-head">'+
+          '<span class="diff-type-badge '+cls+'">'+esc(diffTypeLabel(row.type))+'</span>'+
+          '<code>'+esc(row.device)+'</code>'+
+          '<code>'+esc(row.object)+'</code>'+
+          '<span class="diff-summary">'+esc(row.summary)+'</span>'+
+        '</div>'+
+        panes+
+        evidence+
+      '</article>';
+    }
+    function renderNormalizedDiff(rows) {
+      const groups = {};
+      rows.forEach(r => {
+        const sec = diffSectionKey(r.object);
+        (groups[sec] ||= []).push(r);
+      });
+      const order = ['Interfaces', 'VLANs', 'Routes', 'ACLs', 'Other'];
+      const html = order.filter(s => groups[s]).map(section => {
+        const items = groups[section].map(r => renderDiffChangeCard(r)).join('');
+        return '<section class="norm-section"><h3>'+esc(section)+'</h3><div class="diff-list">'+items+'</div></section>';
+      }).join('');
+      return html || '<div class="empty"><strong>No differences</strong>Configs match for the selected before and after files.</div>';
+    }
+    function renderDiffTable(rows) {
+      if (!rows.length) {
+        return '<table id="diffTableView"><tbody>'+emptyRow(5, 'No differences', 'Configs match for the selected before and after files.')+'</tbody></table>';
+      }
+      const body = rows.map(d => {
+        const cls = diffTypeClass(d.type);
+        return '<tr><td><span class="diff-type-badge '+cls+'">'+esc(diffTypeLabel(d.type))+'</span></td><td><code>'+esc(d.device)+'</code></td><td><code>'+esc(d.object)+'</code></td><td>'+esc(d.summary)+'</td><td>'+evidenceCell(d.evidence)+'</td></tr>';
+      }).join('');
+      return '<table id="diffTableView"><thead><tr><th>type</th><th>device</th><th>object</th><th>summary</th><th>evidence</th></tr></thead><tbody>'+body+'</tbody></table>';
+    }
+    function diffCounts(rows) {
+      const counts = { added: 0, removed: 0, changed: 0 };
+      rows.forEach(r => {
+        if (r.type === 'added') counts.added++;
+        else if (r.type === 'removed') counts.removed++;
+        else counts.changed++;
+      });
+      return counts;
+    }
+    function updateDiffToolbar() {
+      const toolbar = $('diffToolbar');
+      const hasRows = diffRows.length > 0;
+      toolbar.hidden = !hasRows;
+      $('diffSubToggle').hidden = !(hasRows && diffMode === 'normalized');
+      $('diffCount').textContent = diffRows.length + ' change' + (diffRows.length === 1 ? '' : 's');
+      const summaryBar = $('diffSummaryBar');
+      if (hasRows) {
+        const c = diffCounts(diffRows);
+        summaryBar.hidden = false;
+        summaryBar.innerHTML = [
+          '<span class="diff-type-badge diff-add">'+c.added+' added</span>',
+          '<span class="diff-type-badge diff-remove">'+c.removed+' removed</span>',
+          '<span class="diff-type-badge diff-change">'+c.changed+' changed</span>'
+        ].join('');
+      } else {
+        summaryBar.hidden = true;
+        summaryBar.innerHTML = '';
+      }
+      document.querySelectorAll('[data-diff-mode]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.diffMode === diffMode);
+      });
+      document.querySelectorAll('[data-diff-sub]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.diffSub === diffSubMode);
+      });
+    }
+    function renderDiffResults() {
+      updateDiffToolbar();
+      if (!diffRows.length) {
+        $('diffResults').innerHTML = '<div class="empty"><strong>No differences</strong>Configs match for the selected before and after files.</div>';
+        return;
+      }
+      $('diffResults').innerHTML = diffMode === 'table' ? renderDiffTable(diffRows) : renderNormalizedDiff(diffRows);
+    }
+    function setDiffMode(mode) {
+      diffMode = mode;
+      localStorage.setItem('netc.diffMode', mode);
+      updateDiffToolbar();
+      renderDiffResults();
+    }
+    function setDiffSubMode(mode) {
+      diffSubMode = mode;
+      localStorage.setItem('netc.diffSubMode', mode);
+      updateDiffToolbar();
+      renderDiffResults();
     }
     function normItem(lineHtml, ev, evLabel) {
       return '<li class="norm-item"><div class="norm-line">'+lineHtml+'</div>'+evidenceDetails(ev, evLabel)+'</li>';
@@ -732,11 +1083,17 @@ const indexHTML = `<!doctype html>
     async function runDiff() {
       setError('diffError', '');
       try {
-        const rows = await getJSON('/api/diff?' + params({before:$('beforePath').value, after:$('afterPath').value}));
-        $('diffs').querySelector('tbody').innerHTML = rows.length
-          ? rows.map(d => '<tr><td>'+esc(d.type)+'</td><td><code>'+esc(d.device)+'</code></td><td><code>'+esc(d.object)+'</code></td><td>'+esc(d.summary)+'</td><td>'+evidenceCell(d.evidence)+'</td></tr>').join('')
-          : emptyRow(5, 'No differences', 'Configs match for the selected before and after files.');
+        diffRows = await getJSON('/api/diff?' + params({before:$('beforePath').value, after:$('afterPath').value}));
+        if (diffRows.length && diffMode === 'normalized') {
+          /* keep normalized default when changes exist */
+        } else if (!diffRows.length) {
+          diffMode = localStorage.getItem('netc.diffMode') || 'normalized';
+        }
+        renderDiffResults();
       } catch (e) {
+        diffRows = [];
+        $('diffResults').innerHTML = '';
+        updateDiffToolbar();
         setError('diffError', e.message);
       }
     }
@@ -783,6 +1140,13 @@ const indexHTML = `<!doctype html>
     $('checkForm').addEventListener('submit', e => { e.preventDefault(); runCheck(); });
     $('deviceForm').addEventListener('submit', e => { e.preventDefault(); openDevice($('deviceName').value); });
     $('diffForm').addEventListener('submit', e => { e.preventDefault(); runDiff(); });
+    document.querySelectorAll('[data-diff-mode]').forEach(btn => {
+      btn.addEventListener('click', () => setDiffMode(btn.dataset.diffMode));
+    });
+    document.querySelectorAll('[data-diff-sub]').forEach(btn => {
+      btn.addEventListener('click', () => setDiffSubMode(btn.dataset.diffSub));
+    });
+    updateDiffToolbar();
     load().catch(e => setError('queryError', e.message));
   </script>
 </body>
