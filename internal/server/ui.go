@@ -220,6 +220,91 @@ const indexHTML = `<!doctype html>
     .warning { color:var(--warn); font-weight:600; }
     .view { display:none; }
     .view.active { display:block; }
+    .device-meta {
+      display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px;
+    }
+    .device-config { display:flex; flex-direction:column; gap:14px; }
+    .norm-section {
+      border:0.5px solid var(--border);
+      border-radius:10px;
+      background:var(--surface-1);
+      overflow:hidden;
+    }
+    .norm-section h3 {
+      margin:0;
+      padding:10px 12px;
+      font-size:13px;
+      font-weight:500;
+      background:var(--surface-2);
+      border-bottom:0.5px solid var(--border);
+      color:var(--muted);
+    }
+    .norm-list { margin:0; padding:0; list-style:none; }
+    .norm-item {
+      padding:10px 12px;
+      border-bottom:0.5px solid var(--border);
+    }
+    .norm-item:last-child { border-bottom:0; }
+    .norm-line {
+      font-family:var(--mono);
+      font-size:12px;
+      line-height:1.55;
+      color:var(--ink);
+      word-break:break-word;
+    }
+    .norm-line .tag {
+      display:inline-block;
+      border:0.5px solid var(--border);
+      border-radius:999px;
+      padding:0 7px;
+      margin-right:6px;
+      color:var(--muted);
+      font-size:11px;
+      font-family:system-ui, -apple-system, sans-serif;
+    }
+    .norm-evidence {
+      margin-top:8px;
+    }
+    .norm-evidence > summary {
+      cursor:pointer;
+      list-style:none;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      color:var(--muted);
+      font-size:12px;
+      user-select:none;
+    }
+    .norm-evidence > summary::-webkit-details-marker { display:none; }
+    .norm-evidence > summary::before {
+      content:"+";
+      display:inline-grid;
+      place-items:center;
+      width:18px;
+      height:18px;
+      border:0.5px solid var(--border);
+      border-radius:6px;
+      font-weight:600;
+      line-height:1;
+      color:var(--accent);
+      background:var(--surface-2);
+    }
+    .norm-evidence[open] > summary::before { content:"−"; }
+    .norm-evidence-body {
+      margin-top:8px;
+      padding:10px 12px;
+      border:0.5px solid var(--border);
+      border-radius:8px;
+      background:var(--surface-2);
+    }
+    .norm-evidence-body pre {
+      margin:6px 0 0;
+      max-height:200px;
+      font-family:var(--mono);
+      font-size:12px;
+      line-height:1.55;
+      white-space:pre-wrap;
+    }
     @media (max-width: 850px) { main { grid-template-columns:1fr; } aside { border-right:0; border-bottom:0.5px solid var(--border); } .header-actions .status-text { display:none; } }
   </style>
 </head>
@@ -327,7 +412,8 @@ const indexHTML = `<!doctype html>
           <button type="submit">Open</button>
         </form>
         <div id="deviceError" class="error" hidden></div>
-        <table id="deviceDetail"><tbody></tbody></table>
+        <div id="deviceMeta" class="device-meta"></div>
+        <div id="deviceConfig" class="device-config"></div>
       </div>
 
       <div id="diffView" class="view">
@@ -370,6 +456,85 @@ const indexHTML = `<!doctype html>
     function evidenceCell(ev) {
       if (!ev || !ev.file) return '';
       return '<div class="evidence-path"><code>'+esc(ev.file)+':'+ev.start_line+'-'+ev.end_line+'</code></div><pre>'+esc(ev.raw_block)+'</pre>';
+    }
+    function evidenceDetails(ev, label) {
+      if (!ev || !ev.file) return '';
+      const loc = esc(ev.file)+':'+ev.start_line+'-'+(ev.end_line || ev.start_line);
+      return '<details class="norm-evidence"><summary>'+esc(label || 'Evidence')+' · '+loc+'</summary><div class="norm-evidence-body"><code>'+loc+'</code><pre>'+esc(ev.raw_block || '')+'</pre></div></details>';
+    }
+    function normItem(lineHtml, ev, evLabel) {
+      return '<li class="norm-item"><div class="norm-line">'+lineHtml+'</div>'+evidenceDetails(ev, evLabel)+'</li>';
+    }
+    function normSection(title, itemsHtml) {
+      if (!itemsHtml) return '';
+      return '<section class="norm-section"><h3>'+esc(title)+'</h3><ul class="norm-list">'+itemsHtml+'</ul></section>';
+    }
+    function tag(text) { return '<span class="tag">'+esc(text)+'</span>'; }
+    function joinTags(parts) { return parts.filter(Boolean).join(' '); }
+    function renderDeviceConfig(d) {
+      const ifs = (d.interfaces || []).slice().sort((a,b) => String(a.name).localeCompare(String(b.name)));
+      const vlans = (d.vlans || []).slice().sort((a,b) => (a.id||0) - (b.id||0));
+      const routes = (d.routes || []).slice().sort((a,b) => String(a.destination).localeCompare(String(b.destination)));
+      const acls = (d.acls || []).slice().sort((a,b) => String(a.name).localeCompare(String(b.name)));
+      const zones = (d.zones || []).slice().sort((a,b) => String(a.name).localeCompare(String(b.name)));
+      const policies = (d.security_policies || []).slice().sort((a,b) => String(a.name).localeCompare(String(b.name)));
+      const ntp = (d.services?.ntp_servers || []).slice().sort((a,b) => String(a.value).localeCompare(String(b.value)));
+      const syslog = (d.services?.syslog_hosts || []).slice().sort((a,b) => String(a.value).localeCompare(String(b.value)));
+      const snmp = (d.services?.snmp_communities || []).slice().sort((a,b) => String(a.value).localeCompare(String(b.value)));
+      $('deviceMeta').innerHTML = [
+        '<span class="pill">'+esc(d.hostname)+'</span>',
+        d.vendor ? '<span class="pill">'+esc(d.vendor)+'</span>' : '',
+        d.source_file ? '<span class="pill"><code>'+esc(d.source_file)+'</code></span>' : '',
+        '<span class="pill">'+ifs.length+' if</span>',
+        '<span class="pill">'+vlans.length+' vlan</span>',
+        '<span class="pill">'+routes.length+' route</span>'
+      ].join(' ');
+      const sections = [
+        normSection('Interfaces', ifs.map(i => {
+          const parts = [tag(i.mode || 'unknown'), esc(i.name)];
+          if (i.description) parts.push(tag(i.description));
+          if (i.access_vlan) parts.push(tag('access vlan '+i.access_vlan));
+          if (i.trunk_vlans && i.trunk_vlans.length) parts.push(tag('trunk '+i.trunk_vlans.join(',')));
+          if (i.ipv4) parts.push(tag('ip '+i.ipv4));
+          if (i.shutdown) parts.push(tag('shutdown'));
+          return normItem(joinTags(parts), i.evidence, 'Interface');
+        }).join('')),
+        normSection('VLANs', vlans.map(v => {
+          const parts = [tag('vlan '+v.id)];
+          if (v.name) parts.push(esc(v.name));
+          return normItem(joinTags(parts), v.evidence, 'VLAN');
+        }).join('')),
+        normSection('Routes', routes.map(r => {
+          const parts = [esc(r.destination)];
+          if (r.next_hop) parts.push('→ '+esc(r.next_hop));
+          if (r.interface) parts.push(tag('via '+r.interface));
+          if (r.vrf) parts.push(tag('vrf '+r.vrf));
+          return normItem(joinTags(parts), r.evidence, 'Route');
+        }).join('')),
+        normSection('ACLs', acls.map(a => {
+          const entries = (a.entries || []).length;
+          return normItem(joinTags([tag('acl'), esc(a.name), tag(entries+' entr'+(entries===1?'y':'ies'))]), a.evidence, 'ACL');
+        }).join('')),
+        normSection('Zones', zones.map(z => {
+          const ifs = (z.interfaces || []).join(', ');
+          return normItem(joinTags([tag('zone'), esc(z.name), ifs ? tag(ifs) : '']), z.evidence, 'Zone');
+        }).join('')),
+        normSection('Security policies', policies.map(p => {
+          const parts = [tag('policy'), esc(p.name)];
+          if (p.from_zone || p.to_zone) parts.push(tag((p.from_zone||'?')+' → '+(p.to_zone||'?')));
+          if (p.action) parts.push(tag(p.action));
+          if (p.service) parts.push(tag(p.service));
+          return normItem(joinTags(parts), p.evidence, 'Policy');
+        }).join('')),
+        normSection('Services', [
+          ...ntp.map(s => normItem(joinTags([tag('ntp'), esc(s.value)]), s.evidence, 'NTP')),
+          ...syslog.map(s => normItem(joinTags([tag('syslog'), esc(s.value)]), s.evidence, 'Syslog')),
+          ...snmp.map(s => normItem(joinTags([tag('snmp'), esc(s.value)]), s.evidence, 'SNMP'))
+        ].join(''))
+      ].filter(Boolean);
+      $('deviceConfig').innerHTML = sections.length
+        ? sections.join('')
+        : '<div class="empty"><strong>No normalized objects</strong>This device has no parsed interfaces, VLANs, or routes in inventory.</div>';
     }
     function params(obj) {
       const p = new URLSearchParams();
@@ -553,20 +718,14 @@ const indexHTML = `<!doctype html>
       showView('deviceView');
       $('deviceName').value = name;
       setError('deviceError', '');
+      $('deviceMeta').innerHTML = '';
+      $('deviceConfig').innerHTML = '<div class="empty"><strong>Loading…</strong>Fetching normalized config.</div>';
       try {
-        const d = await getJSON('/api/device?brief=1&name=' + encodeURIComponent(name));
-        $('deviceDetail').querySelector('tbody').innerHTML = [
-          ['hostname', d.hostname],
-          ['source', d.source_file],
-          ['interfaces', d.interfaces],
-          ['vlans', d.vlans],
-          ['routes', d.routes],
-          ['acls', d.acls],
-          ['ntp', (d.ntp_servers || []).join(', ')],
-          ['syslog', (d.syslog_hosts || []).join(', ')],
-          ['snmp communities', (d.snmp_communities || []).join(', ')]
-        ].map(r => '<tr><th>'+esc(r[0])+'</th><td>'+esc(r[1])+'</td></tr>').join('');
+        const d = await getJSON('/api/device?name=' + encodeURIComponent(name));
+        renderDeviceConfig(d);
       } catch (e) {
+        $('deviceMeta').innerHTML = '';
+        $('deviceConfig').innerHTML = '';
         setError('deviceError', e.message);
       }
     }
