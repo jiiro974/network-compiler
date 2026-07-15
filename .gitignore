@@ -1,0 +1,10 @@
+.env
+*.secrets
+credentials.yml
+credentials.yaml
+credentials.json
+private/
+dumps/
+*.log
+netc
+netc-inventory.jsonl
