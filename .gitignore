@@ -6,5 +6,5 @@ credentials.json
 private/
 dumps/
 *.log
-netc
+/netc
 netc-inventory.jsonl
