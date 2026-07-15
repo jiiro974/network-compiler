@@ -1,0 +1,12 @@
+Local Intf: Gi1/0/1
+Chassis id: 0011.2233.4455
+Port id: Gi0/1
+System Name: sw2
+System Description: Cisco IOS Software
+System Capabilities: B,R
+
+Local Intf: Gi1/0/2
+Chassis id: 00aa.bbcc.ddee
+Port id: Gi0/9
+System Name: sw3
+System Capabilities: B

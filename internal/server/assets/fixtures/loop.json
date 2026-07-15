@@ -1,0 +1,31 @@
+{
+  "flow": { "src": "10.0.10.55", "dst": "203.0.113.7", "proto": "tcp", "dport": 443 },
+  "verdict": "loop",
+  "reason": { "file": "core-rtr2.set.conf", "start_line": 8, "end_line": 8,
+    "raw_block": "set routing-options static route 203.0.113.0/24 next-hop 10.0.99.1",
+    "parser": "juniper-junos-v0" },
+  "hops": [
+    {
+      "device": "core-rtr1", "vendor": "juniper",
+      "ingress_iface": "ge-0/0/0",
+      "route_match": {
+        "destination": "203.0.113.0/24", "next_hop": "10.0.99.2",
+        "evidence": { "file": "core-rtr1.set.conf", "start_line": 9, "end_line": 9,
+          "raw_block": "set routing-options static route 203.0.113.0/24 next-hop 10.0.99.2",
+          "parser": "juniper-junos-v0" }
+      },
+      "egress_iface": "ge-0/0/3", "next_hop": "10.0.99.2"
+    },
+    {
+      "device": "core-rtr2", "vendor": "juniper",
+      "ingress_iface": "ge-0/0/1",
+      "route_match": {
+        "destination": "203.0.113.0/24", "next_hop": "10.0.99.1",
+        "evidence": { "file": "core-rtr2.set.conf", "start_line": 8, "end_line": 8,
+          "raw_block": "set routing-options static route 203.0.113.0/24 next-hop 10.0.99.1",
+          "parser": "juniper-junos-v0" }
+      },
+      "egress_iface": "ge-0/0/2", "next_hop": "10.0.99.1"
+    }
+  ]
+}

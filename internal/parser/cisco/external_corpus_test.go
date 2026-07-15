@@ -1,8 +1,10 @@
 package cisco
 
 import (
+	"bufio"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -21,7 +23,7 @@ func TestExternalCiscoCorpus(t *testing.T) {
 	}
 
 	parser := New()
-	var totalInterfaces, totalVLANs, totalRoutes, totalACLs int
+	var totalInterfaces, totalVLANs, totalRoutes, totalACLs, totalSNMPLines, totalSNMPStatements, totalSNMPHosts, totalSNMPTraps int
 	for _, file := range files {
 		dev, err := parser.ParseFile(file)
 		if err != nil {
@@ -37,7 +39,34 @@ func TestExternalCiscoCorpus(t *testing.T) {
 		totalVLANs += len(dev.VLANs)
 		totalRoutes += len(dev.Routes)
 		totalACLs += len(dev.ACLs)
+		snmpLines, err := countPrefixLines(file, "snmp-server ")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if snmpLines != len(dev.SNMP.Statements) {
+			t.Fatalf("parse %s: snmp-server lines=%d snmp statements=%d", file, snmpLines, len(dev.SNMP.Statements))
+		}
+		totalSNMPLines += snmpLines
+		totalSNMPStatements += len(dev.SNMP.Statements)
+		totalSNMPHosts += len(dev.SNMP.Hosts)
+		totalSNMPTraps += len(dev.SNMP.Traps)
 	}
 
-	t.Logf("parsed files=%d interfaces=%d vlans=%d routes=%d acls=%d", len(files), totalInterfaces, totalVLANs, totalRoutes, totalACLs)
+	t.Logf("parsed files=%d interfaces=%d vlans=%d routes=%d acls=%d snmp_lines=%d snmp_statements=%d snmp_hosts=%d snmp_traps=%d", len(files), totalInterfaces, totalVLANs, totalRoutes, totalACLs, totalSNMPLines, totalSNMPStatements, totalSNMPHosts, totalSNMPTraps)
+}
+
+func countPrefixLines(path, prefix string) (int, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return 0, err
+	}
+	defer f.Close()
+	var count int
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		if strings.HasPrefix(strings.TrimSpace(scanner.Text()), prefix) {
+			count++
+		}
+	}
+	return count, scanner.Err()
 }

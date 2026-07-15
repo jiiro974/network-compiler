@@ -1,0 +1,11 @@
+{
+  "flow": { "src": "10.0.10.55", "dst": "192.168.50.20", "proto": "tcp", "dport": 443 },
+  "predicted_verdict": "delivered",
+  "checks": [
+    { "from_device": "edge-sw1",  "type": "ping", "target": "10.0.99.1",    "observed": "reachable",   "result": { "loss_pct": 0,   "rtt_avg_ms": 1, "audit_id": "01J8ZQP...A" } },
+    { "from_device": "core-rtr1", "type": "ping", "target": "10.0.99.254",  "observed": "reachable",   "result": { "loss_pct": 0,   "rtt_avg_ms": 2, "audit_id": "01J8ZQP...B" } },
+    { "from_device": "edge-fw1",  "type": "ping", "target": "192.168.50.20","observed": "unreachable", "result": { "loss_pct": 100, "rtt_avg_ms": 0, "audit_id": "01J8ZQP...C" } }
+  ],
+  "observed_verdict": "unreachable",
+  "agreement": "mismatch"
+}

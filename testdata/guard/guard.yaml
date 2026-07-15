@@ -1,0 +1,48 @@
+version: lab-guard-v1
+allow_cidrs:
+  - 10.0.0.0/8
+deny_cidrs:
+  - 10.0.9.0/24
+deny_ipv6_cidrs:
+  - "::/0"
+require_allow_match: true
+targets:
+  mode: inventory_only
+  require_device_id: true
+  require_management_ip: true
+  reject_neighbors_as_targets: true
+commands:
+  allow:
+    - show lldp neighbors detail
+    - show arp
+  deny_patterns:
+    - "^configure"
+    - "^reload"
+limits:
+  max_targets_per_run: 2
+  max_targets_per_cidr: 2
+  max_parallel_sessions: 2
+  per_target_timeout_seconds: 10
+  global_timeout_seconds: 60
+  retry_count: 0
+  require_explicit_targets: true
+  forbid_ping_sweep: true
+  forbid_port_scan: true
+  forbid_subnet_expansion: true
+plan:
+  require_dry_run: true
+  require_plan_hash: true
+  write_rejected_targets: true
+neighbor_expansion:
+  enabled: false
+  require_human_promotion: true
+  promote_only_if_in_allow_cidrs: true
+  promote_only_if_seen_by:
+    - lldp
+    - cdp
+  min_confidence: 0.95
+audit:
+  log_allowed: true
+  log_rejected: true
+  redact_secrets: true
+  include_guard_version: true

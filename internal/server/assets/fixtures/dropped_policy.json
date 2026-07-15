@@ -1,0 +1,27 @@
+{
+  "flow": { "src": "10.0.10.55", "dst": "192.168.50.20", "proto": "tcp", "dport": 22 },
+  "verdict": "dropped_policy",
+  "reason": { "file": "edge-fw1.set.conf", "start_line": 29, "end_line": 29,
+    "raw_block": "set rulebase security rules block-mgmt service tcp-22 action deny",
+    "parser": "pan-os-v0" },
+  "hops": [
+    {
+      "device": "edge-fw1", "vendor": "pan-os",
+      "ingress_iface": "ethernet1/2", "ingress_zone": "trust",
+      "route_match": {
+        "destination": "192.168.50.0/24", "next_hop": "10.0.99.254", "interface": "ethernet1/1.99",
+        "evidence": { "file": "edge-fw1.set.conf", "start_line": 40, "end_line": 40,
+          "raw_block": "set network virtual-router default routing-table ip static-route LAB nexthop ip-address 10.0.99.254",
+          "parser": "pan-os-v0" }
+      },
+      "policy_match": {
+        "name": "block-mgmt", "from_zone": "trust", "to_zone": "dmz",
+        "application": "ssh", "service": "tcp-22", "action": "deny",
+        "evidence": { "file": "edge-fw1.set.conf", "start_line": 29, "end_line": 29,
+          "raw_block": "set rulebase security rules block-mgmt service tcp-22 action deny",
+          "parser": "pan-os-v0" }
+      },
+      "egress_iface": "ethernet1/1.99", "egress_zone": "dmz", "next_hop": "10.0.99.254"
+    }
+  ]
+}

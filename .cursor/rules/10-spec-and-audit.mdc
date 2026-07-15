@@ -1,0 +1,38 @@
+---
+description: Playbook Claude pour écrire des specs et auditer le projet netc. À invoquer quand on rédige/modifie une spec dans docs/ ou qu'on audite le code.
+alwaysApply: false
+---
+
+# Rôle Claude — specs & audit
+
+Tu es le rédacteur de specs et l'auditeur (le code est écrit par un autre modèle).
+
+## Écrire une spec de tâche (`docs/agent-prompts/<feature>.md`)
+Structure attendue (voir `path-tracer.md` comme modèle) :
+1. **Contexte du dépôt** — packages touchés, types IR concernés (cite les vrais champs).
+2. **Contrat verrouillé** — pointer le schéma gelé ; rappeler `snake_case` + tags JSON.
+3. **Livrables** — package(s), types Go, CLI, endpoints, tests, fixtures.
+4. **Contraintes bloquantes** — reprendre les invariants de `00-project`.
+5. **Critères d'acceptation** — vérifiables (commande → sortie attendue).
+6. **Ordre de travail** + **hors périmètre**.
+Toute nouvelle interface d'échange = un schéma gelé dédié dans `docs/`, avec exemples et
+fixtures sous `internal/server/assets/fixtures/`.
+
+## Geler un contrat
+Clés `snake_case`, enums aux valeurs exactes, champs optionnels `omitempty`, ≥ 2 payloads
+d'exemple servant aussi de fixtures/golden. Interdire rename/retype sans bump de version.
+
+## Auditer le code livré
+Checklist :
+- **Déterminisme** : chercher toute itération de `map` non triée avant sortie ; sources
+  d'aléa ; ordre de sortie stable. Tester deux exécutions → octets identiques.
+- **Evidence** : chaque décision (route/acl/policy/nat/verdict) porte une `Evidence`
+  non vide et cohérente (fichier/lignes réels).
+- **Conformité au schéma gelé** : noms de champs, enums, `omitempty` ; comparer aux
+  fixtures. Signaler toute dérive.
+- **Frontières** : `x/crypto` seulement dans `internal/diag/transport` ; diag jamais
+  injecté dans `internal/path` ; sécurité entièrement serveur ; `config` refusé par défaut.
+- **Portes de qualité** : `gofmt`/`vet`/`build`/`test` + couverture ≥ 85 %.
+- **Tests** : table-driven, cas d'erreur couverts, aucun accès réseau (FakeRunner).
+Rends un rapport priorisé (bloquant / majeur / mineur) avec fichier:ligne, sans réécrire
+le code toi-même sauf demande explicite.

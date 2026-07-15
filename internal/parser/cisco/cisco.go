@@ -79,12 +79,9 @@ func (Parser) ParseFile(path string) (ir.Device, error) {
 		case strings.HasPrefix(trimmed, "logging host "):
 			dev.Services.SyslogHosts = append(dev.Services.SyslogHosts, serviceTarget(path, lines[i], strings.TrimSpace(strings.TrimPrefix(trimmed, "logging host "))))
 		case strings.HasPrefix(trimmed, "snmp-server community "):
-			value := strings.TrimSpace(strings.TrimPrefix(trimmed, "snmp-server community "))
-			fields := strings.Fields(value)
-			if len(fields) > 0 {
-				value = fields[0]
-			}
-			dev.Services.SNMPCommunities = append(dev.Services.SNMPCommunities, serviceTarget(path, lines[i], value))
+			parseSNMP(path, lines[i], &dev)
+		case strings.HasPrefix(trimmed, "snmp-server "):
+			parseSNMP(path, lines[i], &dev)
 		}
 	}
 
@@ -277,6 +274,80 @@ func evidence(path string, start, end int, lines []line) ir.Evidence {
 
 func serviceTarget(path string, ln line, value string) ir.ServiceTarget {
 	return ir.ServiceTarget{Value: value, Evidence: evidence(path, ln.num, ln.num, []line{ln})}
+}
+
+func parseSNMP(path string, ln line, dev *ir.Device) {
+	fields := strings.Fields(strings.TrimSpace(ln.text))
+	if len(fields) < 2 || fields[0] != "snmp-server" {
+		return
+	}
+	ev := evidence(path, ln.num, ln.num, []line{ln})
+	dev.SNMP.Statements = append(dev.SNMP.Statements, ir.RawStatement{
+		Kind:     fields[1],
+		Fields:   append([]string(nil), fields[2:]...),
+		Raw:      secretredact.Redact(ln.text),
+		Evidence: ev,
+	})
+	switch fields[1] {
+	case "community":
+		if len(fields) >= 3 {
+			target := ir.ServiceTarget{Value: fields[2], Evidence: ev}
+			dev.SNMP.Communities = append(dev.SNMP.Communities, target)
+			dev.Services.SNMPCommunities = append(dev.Services.SNMPCommunities, target)
+		}
+	case "host":
+		host := parseSNMPHost(fields, ev)
+		if host.Host != "" {
+			dev.SNMP.Hosts = append(dev.SNMP.Hosts, host)
+			if host.Community != "" {
+				dev.Services.SNMPCommunities = append(dev.Services.SNMPCommunities, ir.ServiceTarget{Value: host.Community, Evidence: ev})
+			}
+		}
+	case "enable":
+		if len(fields) >= 4 && fields[2] == "traps" {
+			trap := ir.SNMPTrap{Name: fields[3], Evidence: ev}
+			if len(fields) > 4 {
+				trap.Options = append([]string(nil), fields[4:]...)
+			}
+			dev.SNMP.Traps = append(dev.SNMP.Traps, trap)
+		}
+	case "location":
+		dev.SNMP.Location = ir.ServiceTarget{Value: strings.Join(fields[2:], " "), Evidence: ev}
+	case "contact":
+		dev.SNMP.Contact = ir.ServiceTarget{Value: strings.Join(fields[2:], " "), Evidence: ev}
+	}
+}
+
+func parseSNMPHost(fields []string, ev ir.Evidence) ir.SNMPHost {
+	host := ir.SNMPHost{Evidence: ev}
+	if len(fields) < 3 {
+		return host
+	}
+	host.Host = fields[2]
+	var preVersionOptions []string
+	for i := 3; i < len(fields); i++ {
+		if fields[i] == "version" && i+1 < len(fields) {
+			host.Version = fields[i+1]
+			host.Options = append(host.Options, preVersionOptions...)
+			i++
+			if i+1 < len(fields) {
+				host.Community = fields[i+1]
+				if i+2 < len(fields) {
+					host.Options = append(host.Options, fields[i+2:]...)
+				}
+				return host
+			}
+			return host
+		}
+		preVersionOptions = append(preVersionOptions, fields[i])
+	}
+	if len(fields) > 3 {
+		host.Community = fields[3]
+		if len(fields) > 4 {
+			host.Options = append([]string(nil), fields[4:]...)
+		}
+	}
+	return host
 }
 
 func looksLikeIPv4(s string) bool {

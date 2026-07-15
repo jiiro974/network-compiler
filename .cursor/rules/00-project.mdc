@@ -1,0 +1,31 @@
+---
+description: Invariants et contrats du projet netc (toujours injectés)
+alwaysApply: true
+---
+
+# netc — invariants (toujours)
+
+Réfère-toi à `AGENTS.md` pour le contexte complet. Non négociable :
+
+- **Déterminisme** : mêmes entrées → mêmes octets. Trier toute map avant sortie. Aucun
+  LLM ni aléa dans le chemin de vérité.
+- **Evidence-first** : chaque décision porte l'`Evidence` (fichier/ligne/bloc) de l'objet
+  IR qui l'a produite.
+- **Stdlib uniquement**, sauf `internal/diag/transport` (`golang.org/x/crypto` isolé là).
+- **Diag = observationnel** : jamais dans le chemin de vérité ; `/api/path/validate`
+  compare prédit vs observé, ne fusionne pas.
+- **Sécurité côté serveur** : allowlist, approbation, redaction, audit. L'UI n'exécute
+  rien. Classe `config` refusée par défaut (charte read-only).
+
+## Contrats gelés (ne pas modifier)
+- `docs/path-json-schema.md`
+- `docs/diag-json-schema.md`
+Ajout d'un champ optionnel = seule évolution, à documenter + bump version.
+
+## Portes de qualité (toute tâche)
+`gofmt -l .` vide · `go vet ./...` propre · `go build ./...` · `go test ./...` verts.
+Couverture ≥ 85 % sur tout nouveau package de logique.
+
+## Où sont les specs
+Prompts de tâche : `docs/agent-prompts/*.md`. Plan : `DISPATCH.md` / `ORCHESTRATION.md`.
+Ne recopie pas les prompts — ouvre le fichier concerné et suis-le.

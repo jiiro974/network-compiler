@@ -1,0 +1,10 @@
+hostname sw1
+!
+interface GigabitEthernet1/0/4
+ description to sw5 GigabitEthernet0/4
+ switchport mode trunk
+!
+interface Vlan10
+ description users svi
+ ip address 10.0.10.1 255.255.255.0
+!

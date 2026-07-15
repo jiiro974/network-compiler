@@ -1,0 +1,24 @@
+{
+  "flow": { "src": "10.0.10.55", "dst": "10.0.99.5", "proto": "tcp", "dport": 23 },
+  "verdict": "dropped_acl",
+  "reason": { "file": "testdata/cisco-sw1.cfg", "start_line": 51, "end_line": 51,
+    "raw_block": " deny tcp any any eq telnet", "parser": "cisco-ios-v0" },
+  "hops": [
+    {
+      "device": "edge-sw1", "vendor": "cisco-ios",
+      "ingress_iface": "GigabitEthernet1/0/1",
+      "route_match": {
+        "destination": "10.0.99.0/24", "next_hop": "0.0.0.0", "interface": "Vlan99",
+        "evidence": { "file": "testdata/cisco-sw1.cfg", "start_line": 40, "end_line": 43,
+          "raw_block": "interface Vlan99\n ip address 10.0.99.2 255.255.255.0\n!", "parser": "cisco-ios-v0" }
+      },
+      "acl_match": {
+        "action": "deny", "protocol": "tcp", "match": "any any eq telnet",
+        "raw": "deny tcp any any eq telnet",
+        "evidence": { "file": "testdata/cisco-sw1.cfg", "start_line": 51, "end_line": 51,
+          "raw_block": " deny tcp any any eq telnet", "parser": "cisco-ios-v0" }
+      },
+      "egress_iface": "", "next_hop": ""
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "target": "edge-sw1",
+  "vendor": "cisco-ios",
+  "command": "exec",
+  "class": "config",
+  "rendered_command": "configure terminal",
+  "runner": "ssh",
+  "status": "denied",
+  "approval": {
+    "required": true,
+    "granted": false,
+    "id": "",
+    "approver": "",
+    "ticket": "",
+    "reason": "classe config refusée : capacité config-write absente (charte read-only)"
+  },
+  "started_at": "2026-07-15T10:02:03Z",
+  "duration_ms": 0,
+  "exit_code": -1,
+  "raw_output": "",
+  "audit_id": "01J8ZQN9Z1SW1CFGDENY"
+}

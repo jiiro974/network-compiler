@@ -1,0 +1,18 @@
+{
+  "target": "edge-sw1",
+  "vendor": "cisco-ios",
+  "command": "ping",
+  "class": "diagnostic",
+  "rendered_command": "ping 10.0.99.1 repeat 5",
+  "runner": "ssh",
+  "status": "ok",
+  "approval": null,
+  "started_at": "2026-07-15T10:00:00Z",
+  "duration_ms": 842,
+  "exit_code": 0,
+  "raw_output": "!!!!!\nSuccess rate is 100 percent (5/5), round-trip min/avg/max = 1/1/2 ms",
+  "parsed": {
+    "ping": { "sent": 5, "received": 5, "loss_pct": 0, "rtt_min_ms": 1, "rtt_avg_ms": 1, "rtt_max_ms": 2 }
+  },
+  "audit_id": "01J8ZQK3W0EDGE1PING99A"
+}

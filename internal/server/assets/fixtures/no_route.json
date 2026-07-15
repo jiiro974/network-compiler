@@ -1,0 +1,13 @@
+{
+  "flow": { "src": "10.0.20.30", "dst": "172.16.99.9", "proto": "tcp", "dport": 443 },
+  "verdict": "no_route",
+  "reason": { "file": "core-rtr1.set.conf", "start_line": 1, "end_line": 1,
+    "raw_block": "set system host-name core-rtr1", "parser": "juniper-junos-v0" },
+  "hops": [
+    {
+      "device": "core-rtr1", "vendor": "juniper",
+      "ingress_iface": "ge-0/0/0",
+      "egress_iface": "", "next_hop": ""
+    }
+  ]
+}

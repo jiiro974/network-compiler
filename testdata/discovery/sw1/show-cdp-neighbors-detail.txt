@@ -1,0 +1,11 @@
+Device ID: sw2
+Entry address(es):
+  IP address: 10.0.0.2
+Platform: cisco WS-C2960, Capabilities: Switch IGMP
+Interface: GigabitEthernet1/0/1, Port ID (outgoing port): GigabitEthernet0/1
+
+Device ID: sw4
+Entry address(es):
+  IP address: 10.0.0.4
+Platform: cisco WS-C2960, Capabilities: Switch IGMP
+Interface: GigabitEthernet1/0/3, Port ID (outgoing port): GigabitEthernet0/3

@@ -1,0 +1,5 @@
+{"device":"sw1","management_ip":"10.0.1.10","source":"inventory","commands":["show lldp neighbors detail","show arp"]}
+{"device":"sw2","management_ip":"10.0.2.10","source":"inventory","commands":["show lldp neighbors detail","configure terminal"]}
+{"device":"sw-denied","management_ip":"10.0.9.10","source":"inventory","commands":["show arp"]}
+{"device":"internet","management_ip":"8.8.8.8","source":"inventory","commands":["show arp"]}
+{"device":"sw-neighbor","management_ip":"10.0.3.10","source":"neighbor","commands":["show arp"]}

@@ -1,0 +1,22 @@
+{
+  "target": "edge-fw1",
+  "vendor": "pan-os",
+  "command": "exec",
+  "class": "exec",
+  "rendered_command": "show session all filter destination 192.168.50.20",
+  "runner": "ssh",
+  "status": "needs_approval",
+  "approval": {
+    "required": true,
+    "granted": false,
+    "id": "",
+    "approver": "",
+    "ticket": "",
+    "reason": "commande hors allowlist diagnostique — approbation requise"
+  },
+  "started_at": "2026-07-15T10:01:12Z",
+  "duration_ms": 0,
+  "exit_code": -1,
+  "raw_output": "",
+  "audit_id": "01J8ZQM7YXFW1EXECSESS"
+}

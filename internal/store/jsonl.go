@@ -10,6 +10,10 @@ import (
 )
 
 func WriteJSONL(path string, devices []ir.Device) error {
+	return WriteRecordsJSONL(path, devices)
+}
+
+func WriteRecordsJSONL[T any](path string, records []T) error {
 	f, err := os.Create(path)
 	if err != nil {
 		return err
@@ -17,8 +21,8 @@ func WriteJSONL(path string, devices []ir.Device) error {
 	defer f.Close()
 
 	enc := json.NewEncoder(f)
-	for _, dev := range devices {
-		if err := enc.Encode(dev); err != nil {
+	for _, record := range records {
+		if err := enc.Encode(record); err != nil {
 			return err
 		}
 	}
@@ -26,24 +30,28 @@ func WriteJSONL(path string, devices []ir.Device) error {
 }
 
 func ReadJSONL(path string) ([]ir.Device, error) {
+	return ReadRecordsJSONL[ir.Device](path)
+}
+
+func ReadRecordsJSONL[T any](path string) ([]T, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
 	defer f.Close()
 
-	var devices []ir.Device
+	var records []T
 	scanner := bufio.NewScanner(f)
 	scanner.Buffer(make([]byte, 1024), 16*1024*1024)
 	for line := 1; scanner.Scan(); line++ {
-		var dev ir.Device
-		if err := json.Unmarshal(scanner.Bytes(), &dev); err != nil {
+		var record T
+		if err := json.Unmarshal(scanner.Bytes(), &record); err != nil {
 			return nil, fmt.Errorf("%s:%d: %w", path, line, err)
 		}
-		devices = append(devices, dev)
+		records = append(records, record)
 	}
 	if err := scanner.Err(); err != nil {
 		return nil, err
 	}
-	return devices, nil
+	return records, nil
 }

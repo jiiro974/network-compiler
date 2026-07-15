@@ -1,0 +1,5 @@
+Local Intf: Gi1/0/7
+Chassis id: 0011.2233.7777
+Port id: Gi0/7
+System Name: sw-left
+System Capabilities: B

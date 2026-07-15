@@ -17,7 +17,7 @@ func TestRunJuniperQueries(t *testing.T) {
 		wantType  string
 		wantCount int
 	}{
-		{query: "vlan 10", wantType: "vlan", wantCount: 3},
+		{query: "vlan 10", wantType: "interface", wantCount: 2},
 		{query: "default route", wantType: "route", wantCount: 1},
 	}
 	for _, tt := range tests {

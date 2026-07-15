@@ -1,0 +1,24 @@
+---
+description: Conventions de code Go pour netc (codeur)
+globs: ["**/*.go"]
+alwaysApply: false
+---
+
+# Conventions Go — netc
+
+- `gofmt`/`goimports` propre ; `go vet ./...` sans warning.
+- Erreurs enveloppées avec `%w` et contexte ; pas de `panic` en chemin normal ; pas d'erreur
+  ignorée silencieusement.
+- Pas de dépendance externe (stdlib), sauf `golang.org/x/crypto` **uniquement** dans
+  `internal/diag/transport`.
+- Types exportés et fonctions publiques documentés (commentaire commençant par le nom).
+- Sérialisation JSON : tags `snake_case` **strictement conformes** aux schémas gelés
+  (`docs/*-json-schema.md`) ; champs optionnels `omitempty`.
+- Déterminisme : trier toute itération de `map` avant de produire une sortie ; ne pas
+  dépendre de l'ordre d'itération ; aucune source d'aléa dans le chemin de vérité.
+- Evidence : ne jamais produire un objet de décision sans `Evidence` renseignée.
+- Tests : table-driven, cas nominal + cas d'erreur ; **aucun accès réseau** (utiliser
+  `FakeRunner`) ; golden files alignés sur les fixtures ; viser ≥ 85 % sur les packages
+  de logique.
+- Ne pas modifier un contrat gelé ni la logique de `internal/path` pour faire passer un
+  test ; si un champ manque, c'est une évolution de schéma à documenter.

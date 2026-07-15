@@ -1,0 +1,5 @@
+Local Intf: Gi0/1
+Chassis id: 0055.6677.8899
+Port id: Gi1/0/1
+System Name: sw1
+System Capabilities: B,R

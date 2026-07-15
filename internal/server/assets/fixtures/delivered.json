@@ -1,0 +1,42 @@
+{
+  "flow": { "src": "10.0.10.55", "dst": "192.168.50.20", "proto": "tcp", "dport": 443 },
+  "verdict": "delivered",
+  "reason": { "file": "edge-fw1.set.conf", "start_line": 22, "end_line": 22,
+    "raw_block": "set network interface ethernet ethernet1/1 layer3 units ethernet1/1.99 tag 99 ip 192.168.50.1/24",
+    "parser": "pan-os-v0" },
+  "hops": [
+    {
+      "device": "edge-sw1", "vendor": "cisco-ios",
+      "ingress_iface": "GigabitEthernet1/0/1",
+      "route_match": {
+        "destination": "0.0.0.0/0", "next_hop": "10.0.99.1",
+        "evidence": { "file": "testdata/cisco-sw1.cfg", "start_line": 45, "end_line": 45,
+          "raw_block": "ip route 0.0.0.0 0.0.0.0 10.0.99.1", "parser": "cisco-ios-v0" }
+      },
+      "egress_iface": "GigabitEthernet1/0/24", "next_hop": "10.0.99.1"
+    },
+    {
+      "device": "core-rtr1", "vendor": "juniper",
+      "ingress_iface": "ge-0/0/0",
+      "route_match": {
+        "destination": "192.168.50.0/24", "next_hop": "10.0.99.254",
+        "evidence": { "file": "core-rtr1.set.conf", "start_line": 12, "end_line": 12,
+          "raw_block": "set routing-options static route 192.168.50.0/24 next-hop 10.0.99.254",
+          "parser": "juniper-junos-v0" }
+      },
+      "egress_iface": "ge-0/0/3", "next_hop": "10.0.99.254"
+    },
+    {
+      "device": "edge-fw1", "vendor": "pan-os",
+      "ingress_iface": "ethernet1/2", "ingress_zone": "trust",
+      "policy_match": {
+        "name": "users-to-lab", "from_zone": "trust", "to_zone": "dmz",
+        "application": "ssl", "service": "tcp-443", "action": "allow",
+        "evidence": { "file": "edge-fw1.set.conf", "start_line": 33, "end_line": 33,
+          "raw_block": "set rulebase security rules users-to-lab service tcp-443 action allow",
+          "parser": "pan-os-v0" }
+      },
+      "egress_iface": "ethernet1/1.99", "egress_zone": "dmz", "next_hop": "192.168.50.20"
+    }
+  ]
+}

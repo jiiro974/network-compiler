@@ -1,98 +1,102 @@
 package secretredact
 
 import (
+	"regexp"
 	"strings"
-
-	"network-compiler/internal/syntax"
 )
 
 const marker = "[REDACTED]"
 
+type ruleKind int
+
+const (
+	truncateAfterValue ruleKind = iota
+	replaceValueKeepTail
+)
+
+type rule struct {
+	re   *regexp.Regexp
+	kind ruleKind
+}
+
+// rules are applied in order; first match wins.
+var rules = []rule{
+	// enable secret [5] <hash|plain>
+	{regexp.MustCompile(`(?i)^(\s*enable\s+secret(?:\s+\d+)?)\s+\S+`), truncateAfterValue},
+	// username <u> password [7] <v>
+	{regexp.MustCompile(`(?i)^(\s*username\s+\S+\s+password(?:\s+\d+)?)\s+\S+`), truncateAfterValue},
+	// username <u> secret [5] <v>
+	{regexp.MustCompile(`(?i)^(\s*username\s+\S+\s+secret(?:\s+\d+)?)\s+\S+`), truncateAfterValue},
+	// snmp-server community <v> ...
+	{regexp.MustCompile(`(?i)^(\s*snmp-server\s+community)\s+\S+(\s.*)?$`), replaceValueKeepTail},
+	// snmp-server host ... version 2c <community>
+	{regexp.MustCompile(`(?i)^(\s*snmp-server\s+host\s+\S+(?:\s+\S+)*?\s+version\s+2c)\s+\S+`), truncateAfterValue},
+	// set snmp community <v> ...
+	{regexp.MustCompile(`(?i)^(\s*set\s+snmp\s+community)\s+\S+(\s.*)?$`), replaceValueKeepTail},
+	// Juniper login user encrypted/plain password
+	{regexp.MustCompile(`(?i)^(\s*set\s+system\s+login\s+user\b.*?(?:encrypted-password|plain-text-password))\s+(?:"[^"]*"|\S+)`), truncateAfterValue},
+}
+
+var (
+	snmpHostCommunity = regexp.MustCompile(`(?i)^(\s*snmp-server\s+host\s+\S+)\s+\S+(\s.*)?$`)
+	genericSecret     = regexp.MustCompile(`(?i)^(.*?\b(?:password|secret|token|key)\b(?:\s+\d+)?)\s+\S+`)
+)
+
+// Redact masks secrets in a single configuration or command output line.
 func Redact(line string) string {
-	tokens := syntax.Tokens(line)
-	if len(tokens) == 0 {
+	if line == "" || isDescriptionLine(line) {
 		return line
 	}
-	lower := lowerTokens(tokens)
-
-	switch {
-	case hasPrefix(lower, "enable", "secret"):
-		return redactFromToken(line, tokens, secretValueIndex(tokens, 2))
-	case hasPrefix(lower, "username"):
-		for i := 2; i < len(lower); i++ {
-			if lower[i] == "password" || lower[i] == "secret" {
-				return redactFromToken(line, tokens, secretValueIndex(tokens, i+1))
+	for _, r := range rules {
+		switch r.kind {
+		case truncateAfterValue:
+			if out, ok := applyTruncate(r.re, line); ok {
+				return out
+			}
+		case replaceValueKeepTail:
+			if out, ok := applyKeepTail(r.re, line); ok {
+				return out
 			}
 		}
-	case hasPrefix(lower, "snmp-server", "community"):
-		return redactToken(line, tokens, 2)
-	case hasPrefix(lower, "set", "snmp", "community"):
-		return redactToken(line, tokens, 3)
-	case hasPrefix(lower, "set", "system", "login", "user"):
-		for i := 0; i < len(lower); i++ {
-			if lower[i] == "encrypted-password" || lower[i] == "plain-text-password" {
-				return redactFromToken(line, tokens, i+1)
-			}
+	}
+	if !strings.Contains(strings.ToLower(line), "version") {
+		if out, ok := applyKeepTail(snmpHostCommunity, line); ok {
+			return out
 		}
-	default:
-		for i := 0; i < len(lower); i++ {
-			if lower[i] == "password" || lower[i] == "secret" || lower[i] == "token" || lower[i] == "key" {
-				return redactFromToken(line, tokens, i+1)
-			}
-		}
+	}
+	if out, ok := applyTruncate(genericSecret, line); ok {
+		return out
 	}
 	return line
 }
 
-func secretValueIndex(tokens []syntax.Token, start int) int {
-	if start < len(tokens) && isSecretType(tokens[start].Text) {
-		return start + 1
-	}
-	return start
-}
-
-func isSecretType(s string) bool {
-	if s == "" {
+func isDescriptionLine(line string) bool {
+	trimmed := strings.TrimLeft(line, " \t")
+	if trimmed == "" {
 		return false
 	}
-	for _, ch := range s {
-		if ch < '0' || ch > '9' {
-			return false
-		}
-	}
-	return true
+	fields := strings.Fields(trimmed)
+	return strings.EqualFold(fields[0], "description")
 }
 
-func redactToken(line string, tokens []syntax.Token, index int) string {
-	if index >= len(tokens) {
-		return line
+func applyTruncate(re *regexp.Regexp, line string) (string, bool) {
+	loc := re.FindStringSubmatchIndex(line)
+	if loc == nil {
+		return line, false
 	}
-	return line[:tokens[index].Start] + marker + line[tokens[index].End:]
+	prefix := strings.TrimRight(line[loc[2]:loc[3]], " \t")
+	return prefix + " " + marker, true
 }
 
-func redactFromToken(line string, tokens []syntax.Token, index int) string {
-	if index >= len(tokens) {
-		return line
+func applyKeepTail(re *regexp.Regexp, line string) (string, bool) {
+	sub := re.FindStringSubmatch(line)
+	if sub == nil {
+		return line, false
 	}
-	return strings.TrimRight(line[:tokens[index].Start], " \t") + " " + marker
-}
-
-func lowerTokens(tokens []syntax.Token) []string {
-	out := make([]string, 0, len(tokens))
-	for _, token := range tokens {
-		out = append(out, strings.ToLower(token.Text))
+	prefix := sub[1]
+	tail := ""
+	if len(sub) >= 3 {
+		tail = sub[2]
 	}
-	return out
-}
-
-func hasPrefix(tokens []string, want ...string) bool {
-	if len(tokens) < len(want) {
-		return false
-	}
-	for i := range want {
-		if tokens[i] != want[i] {
-			return false
-		}
-	}
-	return true
+	return prefix + " " + marker + tail, true
 }

@@ -1,0 +1,4 @@
+hostname sw1
+!
+username admin secret 5 $1$abc$def
+snmp-server community public RO
