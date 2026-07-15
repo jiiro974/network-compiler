@@ -14,6 +14,7 @@ import (
 	"network-compiler/internal/ir"
 	"network-compiler/internal/parser"
 	"network-compiler/internal/parser/cisco"
+	"network-compiler/internal/parser/juniper"
 	"network-compiler/internal/query"
 	"network-compiler/internal/report"
 	"network-compiler/internal/server"
@@ -22,6 +23,7 @@ import (
 
 func init() {
 	parser.Register("cisco", cisco.New())
+	parser.Register("juniper", juniper.New())
 }
 
 func main() {
@@ -127,6 +129,7 @@ func inventoryCmd(args []string) error {
 
 func diffCmd(args []string) error {
 	fs := flag.NewFlagSet("diff", flag.ContinueOnError)
+	vendor := fs.String("vendor", "cisco", "vendor parser for config input: cisco, juniper, auto")
 	beforePath := fs.String("before", "", "before config")
 	afterPath := fs.String("after", "", "after config")
 	if err := fs.Parse(args); err != nil {
@@ -135,11 +138,19 @@ func diffCmd(args []string) error {
 	if *beforePath == "" || *afterPath == "" {
 		return fmt.Errorf("usage: netc diff --before <config> --after <config>")
 	}
-	before, err := cisco.New().ParseFile(*beforePath)
+	beforeParser, _, err := parser.Select(*vendor, *beforePath)
 	if err != nil {
 		return err
 	}
-	after, err := cisco.New().ParseFile(*afterPath)
+	before, err := beforeParser.ParseFile(*beforePath)
+	if err != nil {
+		return err
+	}
+	afterParser, _, err := parser.Select(*vendor, *afterPath)
+	if err != nil {
+		return err
+	}
+	after, err := afterParser.ParseFile(*afterPath)
 	if err != nil {
 		return err
 	}

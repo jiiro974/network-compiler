@@ -133,7 +133,7 @@ func findAccessVLAN(dev ir.Device, idText string) ([]Result, error) {
 func findDefaultRoute(dev ir.Device) []Result {
 	var results []Result
 	for _, route := range dev.Routes {
-		if route.Destination == "0.0.0.0 0.0.0.0" {
+		if route.Destination == "0.0.0.0 0.0.0.0" || route.Destination == "0.0.0.0/0" || route.Destination == "::/0" {
 			results = append(results, Result{Type: "route", Device: dev.Hostname, Summary: fmt.Sprintf("default route via %s", route.NextHop), Object: route, Evidence: route.Evidence})
 		}
 	}
